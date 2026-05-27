@@ -1,0 +1,76 @@
+{
+	"id": "fr.alexpiquard.ferricast.Devel",
+	"runtime": "org.gnome.Platform",
+	"runtime-version": "49",
+	"sdk": "org.gnome.Sdk",
+	"sdk-extensions": [
+		"org.freedesktop.Sdk.Extension.rust-stable",
+		"org.freedesktop.Sdk.Extension.llvm20"
+	],
+	"command": "ferricast",
+	"finish-args": [
+		"--share=ipc",
+		"--socket=fallback-x11",
+		"--socket=wayland",
+		"--device=dri",
+		"--env=RUST_LOG=ferricast=debug",
+		"--env=G_MESSAGES_DEBUG=none",
+		"--env=RUST_BACKTRACE=1"
+	],
+	"build-options": {
+		"append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin",
+		"build-args": ["--share=network"],
+		"env": {
+			"PKG_CONFIG_PATH": "/app/lib/pkgconfig:/usr/lib/pkgconfig:/usr/lib/x86_64-linux-gnu/pkgconfig",
+			"PKG_CONFIG_LIBDIR": "/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/share/pkgconfig",
+			"PKG_CONFIG_SYSROOT_DIR": "/",
+			"CARGO_HOME": "/run/build/ferricast/cargo",
+			"CARGO_REGISTRIES_CRATES_IO_PROTOCOL": "sparse",
+			"CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_LINKER": "clang",
+			"CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUSTFLAGS": "-C link-arg=-fuse-ld=/usr/lib/sdk/rust-stable/bin/mold",
+			"CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER": "clang",
+			"CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_RUSTFLAGS": "-C link-arg=-fuse-ld=/usr/lib/sdk/rust-stable/bin/mold"
+		},
+		"test-args": ["--socket=x11", "--share=network"]
+	},
+	"modules": [
+		{
+			"name": "gstreamer",
+			"buildsystem": "meson",
+			"config-opts": [
+				"-Dauto_features=disabled",
+				"-Dbase=enabled",
+				"-Dgood=enabled",
+				"-Dbad=enabled",
+				"-Dugly=enabled",
+				"-Dges=enabled",
+				"-Dgst-plugins-base:gl=enabled",
+				"-Dgst-plugins-base:gl_platform=egl",
+				"-Dgst-plugins-base:gl_winsys=x11,wayland",
+				"-Dgst-plugins-base:x11=enabled",
+				"-Dgst-full-libraries=ges,gl,video,audio,pbutils",
+				"-Dtests=disabled"
+			],
+			"sources": [
+				{
+					"type": "git",
+					"url": "https://gitlab.freedesktop.org/gstreamer/gstreamer.git",
+					"branch": "1.26"
+				}
+			],
+			"cleanup": ["/bin", "/share/man", "/include", "/lib/pkgconfig"]
+		},
+		{
+			"name": "ferricast",
+			"buildsystem": "meson",
+			"run-tests": true,
+			"config-opts": ["-Dprofile=development"],
+			"sources": [
+				{
+					"type": "dir",
+					"path": "../"
+				}
+			]
+		}
+	]
+}

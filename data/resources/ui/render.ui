@@ -1,0 +1,203 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.18"/>
+  <requires lib="libadwaita" version="1.6"/>
+  <template class="RenderWindow" parent="AdwWindow">
+    <property name="default-height">400</property>
+    <property name="default-width">640</property>
+    <property name="modal">true</property>
+    <child>
+      <object class="AdwToolbarView">
+        <property name="content">
+          <object class="GtkBox">
+            <property name="halign">center</property>
+            <property name="margin-top">32</property>
+            <property name="orientation">vertical</property>
+            <property name="valign">start</property>
+            <child>
+              <object class="GtkStack" id="content_stack">
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">settings</property>
+                    <property name="child">
+                      <object class="GtkListBox">
+                        <property name="selection-mode">none</property>
+                        <property name="width-request">400</property>
+                        <child>
+                          <object class="AdwComboRow" id="format_input">
+                            <property name="enable-search">false</property>
+                            <property name="model">
+                              <object class="GtkStringList" id="formats_list">
+                                <items>
+                                </items>
+                              </object>
+                            </property>
+                            <property name="subtitle" translatable="yes">Change the format of the produced video</property>
+                            <property name="title" translatable="yes">Video format</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwSpinRow" id="start_time_input">
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">0</property>
+                                <property name="page-increment">1</property>
+                                <property name="step-increment">0.1</property>
+                                <property name="upper">9999</property>
+                                <property name="value">0</property>
+                              </object>
+                            </property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="subtitle" translatable="yes">Set the exact timestamp in seconds where the video should begin</property>
+                            <property name="title" translatable="yes">Start position (sec)</property>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="AdwSpinRow" id="end_time_input">
+                            <property name="adjustment">
+                              <object class="GtkAdjustment">
+                                <property name="lower">-1</property>
+                                <property name="page-increment">1</property>
+                                <property name="step-increment">0.1</property>
+                                <property name="upper">9999</property>
+                                <property name="value">-1</property>
+                              </object>
+                            </property>
+                            <property name="digits">2</property>
+                            <property name="numeric">True</property>
+                            <property name="subtitle" translatable="yes">Set the exact timestamp in seconds where the video should end</property>
+                            <property name="title" translatable="yes">End position (sec)</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="boxed-list"/>
+                        </style>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStackPage">
+                    <property name="name">render</property>
+                    <property name="child">
+                      <object class="GtkBox">
+                        <property name="hexpand">True</property>
+                        <property name="valign">center</property>
+                        <property name="vexpand">True</property>
+                        <child>
+                          <object class="GtkProgressBar" id="progress_bar">
+                            <property name="hexpand">True</property>
+                            <property name="show-text">True</property>
+                          </object>
+                        </child>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">Render video</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child type="bottom">
+          <object class="GtkStack" id="action_bar_stack">
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">settings</property>
+                <property name="child">
+                  <object class="GtkActionBar">
+                    <property name="revealed">true</property>
+                    <property name="valign">end</property>
+                    <child type="start">
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">Cancel</property>
+                        <signal name="clicked" handler="handle_settings_cancel_clicked" swapped="yes"/>
+                      </object>
+                    </child>
+                    <child type="end">
+                      <object class="GtkButton">
+                        <signal name="clicked" handler="handle_render_clicked" swapped="yes"/>
+                        <child>
+                          <object class="AdwButtonContent">
+                            <property name="icon-name">camera-web-symbolic</property>
+                            <property name="label" translatable="yes">Render</property>
+                            <property name="tooltip-text" translatable="yes">Render video with defined settings</property>
+                          </object>
+                        </child>
+                        <style>
+                          <class name="suggested-action"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkStackPage">
+                <property name="name">render</property>
+                <property name="child">
+                  <object class="GtkActionBar">
+                    <property name="revealed">true</property>
+                    <property name="valign">end</property>
+                    <child type="start">
+                      <object class="GtkButton">
+                        <property name="label" translatable="yes">Cancel</property>
+                        <signal name="clicked" handler="handle_render_cancel_clicked" swapped="yes"/>
+                      </object>
+                    </child>
+                    <child type="end">
+                      <object class="GtkBox" id="render_action_bar_end_box">
+                        <property name="spacing">12</property>
+                        <property name="visible">False</property>
+                        <child>
+                          <object class="GtkButton">
+                            <signal name="clicked" handler="handle_open_clicked" swapped="yes"/>
+                            <child>
+                              <object class="AdwButtonContent">
+                                <property name="icon-name">folder-symbolic</property>
+                                <property name="label" translatable="yes">Open Folder</property>
+                                <property name="tooltip-text" translatable="yes">Open the folder of the created video</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="raised"/>
+                            </style>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton">
+                            <signal name="clicked" handler="handle_play_clicked" swapped="yes"/>
+                            <child>
+                              <object class="AdwButtonContent">
+                                <property name="icon-name">video-display-symbolic</property>
+                                <property name="label" translatable="yes">Play</property>
+                                <property name="tooltip-text" translatable="yes">Play the created video</property>
+                              </object>
+                            </child>
+                            <style>
+                              <class name="suggested-action"/>
+                            </style>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                  </object>
+                </property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

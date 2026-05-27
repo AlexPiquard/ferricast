@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=@name@
+Comment=Generate motion-enhanced screen recordings
+Type=Application
+Exec=@pkgname@
+Terminal=false
+Categories=GNOME;GTK;AudioVideo;Video;Utility;
+Keywords=Gnome;GTK;
+Icon=@icon@
+StartupNotify=true
+DBusActivatable=true

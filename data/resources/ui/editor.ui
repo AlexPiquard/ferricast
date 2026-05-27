@@ -1,0 +1,228 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gtk" version="4.18"/>
+  <requires lib="libadwaita" version="1.4"/>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="action">app.preferences</attribute>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.show-help-overlay</attribute>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="action">app.about</attribute>
+        <attribute name="label" translatable="yes">_About Ferricast</attribute>
+      </item>
+    </section>
+  </menu>
+  <template class="EditorWindow" parent="AdwApplicationWindow">
+    <property name="default-height">800</property>
+    <property name="default-width">1200</property>
+    <property name="title" translatable="yes">Ferricast Editor</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <property name="top-bar-style">raised</property>
+        <property name="content">
+          <object class="GtkPaned">
+            <property name="end-child">
+              <object class="GtkBox">
+                <property name="margin-bottom">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-start">12</property>
+                <property name="margin-top">12</property>
+                <property name="orientation">vertical</property>
+                <child>
+                  <object class="GtkStackSwitcher">
+                    <property name="halign">center</property>
+                    <property name="margin-bottom">12</property>
+                    <property name="stack">stack</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkStack" id="stack">
+                    <child>
+                      <object class="GtkStackPage">
+                        <property name="child">
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
+                            <child>
+                              <object class="AdwSwitchRow" id="cursor_show">
+                                <property name="active">True</property>
+                                <property name="title" translatable="yes">Show cursor</property>
+                                <signal name="notify::active" handler="handle_cursor_switch" swapped="yes"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Smoothing</property>
+                                <child>
+                                  <object class="GtkScale" id="cursor_smoothing_scale">
+                                    <property name="adjustment">
+                                      <object class="GtkAdjustment">
+                                        <property name="lower">0</property>
+                                        <property name="page-increment">10</property>
+                                        <property name="step-increment">1</property>
+                                        <property name="upper">100</property>
+                                        <property name="value">0</property>
+                                      </object>
+                                    </property>
+                                    <property name="digits">0</property>
+                                    <property name="draw-value">True</property>
+                                    <property name="hexpand">True</property>
+                                    <property name="orientation">horizontal</property>
+                                    <property name="value-pos">right</property>
+                                    <property name="width-request">150</property>
+                                    <signal name="value-changed" handler="handle_cursor_smoothing_changed" swapped="yes"/>
+                                  </object>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </property>
+                        <property name="title" translatable="yes">Cursor</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkStackPage">
+                        <property name="child">
+                          <object class="GtkLabel">
+                            <property name="label" translatable="yes">Empty Page</property>
+                          </object>
+                        </property>
+                        <property name="title" translatable="yes">Background</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+            <property name="shrink-end-child">False</property>
+            <property name="shrink-start-child">False</property>
+            <property name="start-child">
+              <object class="GtkBox">
+                <property name="hexpand">true</property>
+                <property name="margin-bottom">12</property>
+                <property name="margin-end">12</property>
+                <property name="margin-start">24</property>
+                <property name="margin-top">12</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">20</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkPicture" id="video_area">
+                    <property name="can-shrink">true</property>
+                    <property name="height-request">450</property>
+                    <property name="vexpand">true</property>
+                    <property name="width-request">800</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkCenterBox">
+                    <child type="start">
+                      <object class="GtkBox">
+                        <property name="halign">start</property>
+                        <property name="spacing">20</property>
+                        <child>
+                          <object class="GtkButton" id="zoom_button">
+                            <signal name="clicked" handler="handle_zoom_clicked" swapped="yes"/>
+                            <child>
+                              <object class="AdwButtonContent">
+                                <property name="icon-name">zoom-in-symbolic</property>
+                                <property name="label" translatable="yes">Zoom</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="trim_button">
+                            <property name="sensitive">False</property>
+                            <child>
+                              <object class="AdwButtonContent">
+                                <property name="icon-name">edit-cut-symbolic</property>
+                                <property name="label" translatable="yes">Trim</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="speed_button">
+                            <property name="sensitive">False</property>
+                            <child>
+                              <object class="AdwButtonContent">
+                                <property name="icon-name">media-seek-forward-symbolic</property>
+                                <property name="label" translatable="yes">Speed</property>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="center">
+                      <object class="GtkButton" id="pause_button">
+                        <property name="halign">center</property>
+                        <property name="hexpand">True</property>
+                        <property name="icon-name">media-playback-pause-symbolic</property>
+                        <property name="valign">center</property>
+                        <signal name="clicked" handler="handle_pause_clicked" swapped="yes"/>
+                        <style>
+                          <class name="circular"/>
+                          <class name="opaque"/>
+                        </style>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkBox" id="timeline_box">
+                    <property name="height-request">0</property>
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">5</property>
+                    <property name="vexpand">True</property>
+                    <child>
+                      <object class="VideoTimeline" id="timeline_widget">
+                        <property name="height-request">60</property>
+                        <property name="hexpand">true</property>
+                        <property name="vexpand">true</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </property>
+        <child type="top">
+          <object class="AdwHeaderBar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
+                <property name="primary">true</property>
+                <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="GtkButton" id="render_button">
+                <property name="sensitive">False</property>
+                <signal name="clicked" handler="handle_render_clicked" swapped="yes"/>
+                <child>
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">camera-web-symbolic</property>
+                    <property name="label" translatable="yes">Render</property>
+                    <property name="tooltip-text" translatable="yes">Render video</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="suggested-action"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

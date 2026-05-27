@@ -1,0 +1,16 @@
+/target/
+/build/
+/_build/
+/builddir/
+/build-aux/app
+/build-aux/.flatpak-builder/
+/build-aux/fr.alexpiquard.ferricast.json
+*.ui.in~
+*.ui~
+/.flatpak/
+/vendor
+/.vscode
+/CHEATSHEET.md
+/.flatpak-builder/
+/repo/
+ferricast.pot

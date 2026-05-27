@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+    <gresource prefix="@PATH_ID@">
+    <file compressed="true" preprocess="xml-stripblanks" alias="metainfo.xml">@APP_ID@.metainfo.xml</file>
+    <!-- see https://gtk-rs.org/gtk4-rs/git/docs/gtk4/struct.Application.html#automatic-resources -->
+    <file compressed="true" preprocess="xml-stripblanks" alias="gtk/help-overlay.ui">ui/shortcuts.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/render.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">ui/editor.ui</file>
+    <file compressed="true">style.css</file>
+    <file compressed="true">cursors/cursor.svg</file>
+  </gresource>
+</gresources>

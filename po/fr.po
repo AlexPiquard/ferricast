@@ -1,0 +1,217 @@
+# French translations for ferricast package.
+# Copyright (C) 2026 THE ferricast'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the ferricast package.
+# AlexPiquard <alex.piquard@hotmail.com>, 2026.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ferricast\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-06-05 17:06+0200\n"
+"PO-Revision-Date: 2026-06-05 10:51+0200\n"
+"Last-Translator: AlexPiquard <alex.piquard@hotmail.com>\n"
+"Language-Team: French <traduc@traduc.org>\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: data/fr.alexpiquard.ferricast.desktop.in.in:2
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:7
+msgid "@name@"
+msgstr "@name@"
+
+#: data/fr.alexpiquard.ferricast.desktop.in.in:3
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:8
+msgid "Generate motion-enhanced screen recordings"
+msgstr "Générer des enregistrements d'écran avec effets de mouvement"
+
+#: data/fr.alexpiquard.ferricast.desktop.in.in:8
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: data/fr.alexpiquard.ferricast.gschema.xml.in:6
+msgid "Window width"
+msgstr "Largeur de la fenêtre"
+
+#: data/fr.alexpiquard.ferricast.gschema.xml.in:10
+msgid "Window height"
+msgstr "Hauteur de la fenêtre"
+
+#: data/fr.alexpiquard.ferricast.gschema.xml.in:14
+msgid "Window maximized state"
+msgstr "Fenêtre en plein écran"
+
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:10
+msgid ""
+"Transform screen recordings into animated videos with zooms. Automate motion "
+"effects and mouse movements from your captures."
+msgstr ""
+"Transformation d'enregistrements d'écran en vidéos animées avec des zooms. "
+"Effets de mouvement et déplacements de souris automatiques à partir des "
+"captures."
+
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:16
+msgid "Editor window"
+msgstr "Fenêtre de l'éditeur"
+
+#: data/resources/ui/shortcuts.ui:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Général"
+
+#: data/resources/ui/shortcuts.ui:14
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Afficher les raccourcis"
+
+#: data/resources/ui/shortcuts.ui:20
+msgctxt "shortcut window"
+msgid "Close Window"
+msgstr "Fermer la fenêtre"
+
+#: data/resources/ui/shortcuts.ui:26
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Quitter"
+
+#: data/resources/ui/window.ui:10 data/resources/ui/editor.ui:9
+msgid "_Preferences"
+msgstr "_Préférences"
+
+#: data/resources/ui/window.ui:14 data/resources/ui/editor.ui:13
+msgid "_Keyboard Shortcuts"
+msgstr "_Raccourcis clavier"
+
+#: data/resources/ui/window.ui:18 data/resources/ui/editor.ui:17
+msgid "_About Ferricast"
+msgstr "_À propos de Ferricast"
+
+#: data/resources/ui/window.ui:43
+msgid "Start recording"
+msgstr "Démarrer l'enregistrement"
+
+#: data/resources/ui/window.ui:56
+msgid "Open existing recording"
+msgstr "Ouvrir un enregistrement existant"
+
+#: data/resources/ui/window.ui:69 data/resources/ui/editor.ui:202
+msgid "Main Menu"
+msgstr "Menu principal"
+
+#: data/resources/ui/editor.ui:24
+msgid "Ferricast Editor"
+msgstr "Éditeur Ferricast"
+
+#: data/resources/ui/editor.ui:54
+msgid "Show cursor"
+msgstr "Afficher le curseur"
+
+#: data/resources/ui/editor.ui:60
+msgid "Smoothing"
+msgstr "Lissage"
+
+#: data/resources/ui/editor.ui:85
+msgid "Cursor"
+msgstr "Curseur"
+
+#: data/resources/ui/editor.ui:92
+msgid "Empty Page"
+msgstr "Page vide"
+
+#: data/resources/ui/editor.ui:95
+msgid "Background"
+msgstr "Arrière-plan"
+
+#: data/resources/ui/editor.ui:134
+msgid "Zoom"
+msgstr "Zoom"
+
+#: data/resources/ui/editor.ui:145
+msgid "Trim"
+msgstr "Rogner"
+
+#: data/resources/ui/editor.ui:156
+msgid "Speed"
+msgstr "Vitesse"
+
+#: data/resources/ui/editor.ui:214 data/resources/ui/render.ui:132
+msgid "Render"
+msgstr "Exporter"
+
+#: data/resources/ui/editor.ui:215 data/resources/ui/render.ui:106
+msgid "Render video"
+msgstr "Créer la vidéo"
+
+#: data/resources/ui/render.ui:35
+msgid "Change the format of the produced video"
+msgstr "Changer le format de la vidéo produite"
+
+#: data/resources/ui/render.ui:36
+msgid "Video format"
+msgstr "Format vidéo"
+
+#: data/resources/ui/render.ui:52
+msgid "Set the exact timestamp in seconds where the video should begin"
+msgstr "Définir l'horodatage exact en secondes où la vidéo doit commencer"
+
+#: data/resources/ui/render.ui:53
+msgid "Start position (sec)"
+msgstr "Position de début (sec)"
+
+#: data/resources/ui/render.ui:69
+msgid "Set the exact timestamp in seconds where the video should end"
+msgstr "Définir l'horodatage exact en secondes où la vidéo doit se terminer"
+
+#: data/resources/ui/render.ui:70
+msgid "End position (sec)"
+msgstr "Position de fin (sec)"
+
+#: data/resources/ui/render.ui:122 data/resources/ui/render.ui:154
+msgid "Cancel"
+msgstr "Annuler"
+
+#: data/resources/ui/render.ui:133
+msgid "Render video with defined settings"
+msgstr "Créer la vidéo avec les paramètres définis"
+
+#: data/resources/ui/render.ui:168
+msgid "Open Folder"
+msgstr "Ouvrir le dossier"
+
+#: data/resources/ui/render.ui:169
+msgid "Open the folder of the created video"
+msgstr "Ouvrir le dossier de la vidéo créée"
+
+#: data/resources/ui/render.ui:183
+msgid "Play"
+msgstr "Lire"
+
+#: data/resources/ui/render.ui:184
+msgid "Play the created video"
+msgstr "Lire la vidéo créée"
+
+#: src/application.rs:125
+msgid "translator-credits"
+msgstr "Alex Piquard"
+
+#: src/widgets/timeline.rs:376
+msgid "Factor"
+msgstr "Facteur"
+
+#: src/widgets/timeline.rs:381
+msgid "Horizontal pos"
+msgstr "Pos. horizontale"
+
+#: src/widgets/timeline.rs:386
+msgid "Vertical pos"
+msgstr "Pos. verticale"
+
+#: src/widgets/timeline.rs:410
+msgid "Remove"
+msgstr "Supprimer"
+
+#: src/windows/editor.rs:176
+msgid "Failed to open recording"
+msgstr "Echec d'ouverture de la vidéo"

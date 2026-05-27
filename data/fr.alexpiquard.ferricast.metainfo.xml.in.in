@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- AlexPiquard 2029 <alex.piquard@hotmail.com> -->
+<component type="desktop-application">
+  <id>@app-id@</id>
+  <metadata_license>CC0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <name>@name@</name>
+  <summary>Generate motion-enhanced screen recordings</summary>
+  <description>
+    <p>Transform screen recordings into animated videos with zooms. Automate motion effects and mouse movements from your captures.</p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://github.com/AlexPiquard/ferricast/raw/main/data/resources/screenshots/screenshot1.png</image>
+      <caption>Editor window</caption>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://github.com/AlexPiquard/ferricast</url>
+  <url type="bugtracker">https://github.com/AlexPiquard/ferricast/issues</url>
+  <!-- Source code repository -->
+  <url type="vcs-browser">https://github.com/AlexPiquard/ferricast</url>
+  <!-- Translation repository -->
+  <url type="translate">https://github.com/AlexPiquard/ferricast/tree/main/po</url>
+  <!-- Open Age Ratings Service:
+       https://hughsie.github.io/oars/generate.html
+  -->
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="0.1.0" date="2026-05-13" />
+  </releases>
+  <!-- Introduced with Appstream 1.0, but not yet fully supported by corresponding projects -->
+  <developer id="gnome.org">
+    <name translate="no">AlexPiquard</name>
+  </developer>
+  <!--
+    Branding colors:
+    https://docs.flathub.org/docs/for-app-authors/metainfo-guidelines/#brand-color
+  -->
+  <branding>
+    <color type="primary" scheme_preference="light">#ff00ff</color>
+    <color type="primary" scheme_preference="dark">#993d3d</color>
+  </branding>
+  <update_contact>alex.piquard@hotmail.com</update_contact>
+  <translation type="gettext">@gettext-package@</translation>
+  <launchable type="desktop-id">@app-id@.desktop</launchable>
+</component>

@@ -1,0 +1,29 @@
+[package]
+name = "ferricast"
+authors = ["Alex Piquard <alex.piquard@hotmail.com>"]
+edition = "2024"
+
+[profile.release]
+lto = true
+
+[dependencies]
+gettext-rs = { version = "0.7", features = ["gettext-system"] }
+gtk = { version = "0.11", package = "gtk4", features = ["v4_10"] }
+pipewire = { version = "0.9", features = ["v0_3_32"] }
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+anyhow = "1"
+ashpd = "0.12.1"
+glib = {version = "0.22.2"}
+gst = {package = "gstreamer", version = "0.25", features= ["v1_24"] }
+gst-video = { package = "gstreamer-video", version="0.25", features = ["v1_24"] }
+gst-app = { package = "gstreamer-app", version="0.25" }
+adw = { version = "0.9.1", package = "libadwaita", features = ["v1_7"] }
+gifski = "1.34.0"
+async-channel = "2.5.0"
+gio = "0.21.5"
+graphene = { package = "graphene-rs", version = "0.21" }
+ges = { package = "gstreamer-editing-services", version = "0.25" }
+gst-controller = { package = "gstreamer-controller", version = "0.25" }
+tracing = "0.1.37"
+tracing-subscriber = "0.3"
+derivative = "2.2.0"

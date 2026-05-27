@@ -1,0 +1,79 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<interface>
+  <requires lib="gio" version="2.0"/>
+  <requires lib="gtk" version="4.18"/>
+  <requires lib="libadwaita" version="1.6"/>
+  <menu id="primary_menu">
+    <section>
+      <item>
+        <attribute name="action">app.preferences</attribute>
+        <attribute name="label" translatable="yes">_Preferences</attribute>
+      </item>
+      <item>
+        <attribute name="action">win.show-help-overlay</attribute>
+        <attribute name="label" translatable="yes">_Keyboard Shortcuts</attribute>
+      </item>
+      <item>
+        <attribute name="action">app.about</attribute>
+        <attribute name="label" translatable="yes">_About Ferricast</attribute>
+      </item>
+    </section>
+  </menu>
+  <template class="MainWindow" parent="AdwApplicationWindow">
+    <property name="default-height">200</property>
+    <property name="default-width">500</property>
+    <property name="title">Ferricast</property>
+    <property name="content">
+      <object class="AdwToolbarView">
+        <property name="content">
+          <object class="GtkBox">
+            <property name="halign">center</property>
+            <property name="margin-bottom">32</property>
+            <property name="margin-end">32</property>
+            <property name="margin-start">32</property>
+            <property name="margin-top">32</property>
+            <property name="spacing">18</property>
+            <child>
+              <object class="GtkButton">
+                <property name="valign">center</property>
+                <signal name="clicked" handler="handle_record_clicked" swapped="True"/>
+                <child>
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">folder-videos-symbolic</property>
+                    <property name="label" translatable="yes">Start recording</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton">
+                <property name="valign">center</property>
+                <signal name="clicked" handler="handle_open_clicked" swapped="True"/>
+                <child>
+                  <object class="AdwButtonContent">
+                    <property name="icon-name">folder-drag-accept-symbolic</property>
+                    <property name="label" translatable="yes">Open existing recording</property>
+                    <property name="valign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+          </object>
+        </property>
+        <child type="top">
+          <object class="AdwHeaderBar" id="headerbar">
+            <child type="end">
+              <object class="GtkMenuButton">
+                <property name="icon-name">open-menu-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
+                <property name="primary">true</property>
+                <property name="menu-model">primary_menu</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>
