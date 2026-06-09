@@ -280,7 +280,6 @@ impl Video {
     pub fn start(&self) {
         if let Err(e) = self.pipeline.set_state(gst::State::Playing) {
             tracing::error!("failed to start pipeline: {:?}", e);
-            // TODO: show error?
         }
     }
 

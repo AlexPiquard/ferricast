@@ -24,7 +24,6 @@ pub fn render<F>(
 
 pub type OnProgressFn = Option<Arc<dyn Fn(f64) + Send + Sync + 'static>>;
 
-// TODO: why not just a function ?
 struct Render {
     pipeline: Option<Pipeline>,
     settings: RenderSettings,
