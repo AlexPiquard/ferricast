@@ -163,7 +163,9 @@ mod imp {
             if !self.ready.get() {
                 return;
             }
-            self.video_mut().set_cursor_show(switch.is_active());
+            if let Err(e) = self.video_mut().set_cursor_show(switch.is_active()) {
+                tracing::warn!("failed to hide/show cursor: {:?}", e);
+            }
         }
     }
 

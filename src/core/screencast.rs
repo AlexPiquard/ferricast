@@ -1,6 +1,5 @@
 use std::{
     cell::RefCell,
-    io::{BufWriter, Write},
     os::fd::OwnedFd,
     path::{Path, PathBuf},
     rc::Rc,
@@ -16,9 +15,8 @@ use ashpd::desktop::{
 };
 use pipewire::{self as pw, spa::utils::Rectangle, stream::StreamState};
 use pw::{properties::properties, spa};
-use std::fs::File;
 
-use crate::core::utils;
+use crate::core::{cursor::CursorFile, utils};
 
 struct UserData {
     format: spa::param::video::VideoInfoRaw,
@@ -26,6 +24,7 @@ struct UserData {
     bus_guard: Option<BusWatchGuard>,
     temp_filename: Rc<PathBuf>,
     cursor_file: Option<RefCell<CursorFile>>,
+    cursor_hashes: Vec<u64>,
     pipeline: Option<gst::Pipeline>,
     first_buffer_pts: u64,
     first_cursor_pts: u64,
@@ -39,50 +38,6 @@ impl UserData {
     fn error(&self, msg: &str) {
         tracing::error!("{}", msg);
         let _ = self.eos_sender.send(());
-    }
-}
-
-const CURSOR_INTERVAL_MS: u128 = 16;
-
-struct CursorFile {
-    writer: BufWriter<File>,
-    last_write_pts: u128,
-}
-
-impl CursorFile {
-    fn new(path: &Path) -> Self {
-        let path = &path.with_extension("curs");
-        let path_str = path.to_str().unwrap();
-        let file = File::create(path_str).expect("failed to create cursor file");
-        Self {
-            writer: BufWriter::new(file),
-            last_write_pts: 0,
-        }
-    }
-
-    fn write(&mut self, pts: u64, x: i32, y: i32) {
-        let now_ms = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_millis();
-        if now_ms - self.last_write_pts < CURSOR_INTERVAL_MS {
-            return;
-        }
-        self.last_write_pts = now_ms;
-
-        let _ = self.writer.write(&pts.to_le_bytes());
-        let _ = self.writer.write(&x.to_le_bytes());
-        let _ = self.writer.write(&y.to_le_bytes());
-    }
-
-    fn flush(&mut self) {
-        let _ = self.writer.flush();
-    }
-}
-
-impl Drop for CursorFile {
-    fn drop(&mut self) {
-        self.flush();
     }
 }
 
@@ -238,6 +193,7 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
         bus_guard: None,
         temp_filename,
         cursor_file: None,
+        cursor_hashes: Vec::new(),
         pipeline: None,
         first_cursor_pts: 0,
         first_buffer_pts: 0,
@@ -365,6 +321,7 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                 let metas_ptr = (*spa_buf).metas;
                 let mut pts: u64 = 0;
                 let mut cursor: Option<*const spa::sys::spa_meta_cursor> = None;
+                let mut cursor_hash: Option<u64> = None;
                 for i in 0..(*spa_buf).n_metas {
                     let meta = metas_ptr.add(i as usize);
 
@@ -377,6 +334,56 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                     }
                     if m_type == spa::sys::SPA_META_Cursor {
                         cursor = Some(m_data as *const spa::sys::spa_meta_cursor);
+
+                        if let Some(c) = cursor
+                            && (*c).bitmap_offset != 0
+                        {
+                            let bitmap_ptr = (c as *const u8).add((*c).bitmap_offset as usize)
+                                as *const spa::sys::spa_meta_bitmap;
+                            let bitmap = *bitmap_ptr;
+
+                            let width = bitmap.size.width;
+                            let height = bitmap.size.height;
+                            let stride = bitmap.stride;
+
+                            if width > 0 && height > 0 && bitmap.offset != 0 {
+                                let pixels_ptr =
+                                    (bitmap_ptr as *const u8).add(bitmap.offset as usize);
+
+                                let total_bytes = (height * stride as u32) as usize;
+                                let pixels_slice =
+                                    std::slice::from_raw_parts(pixels_ptr, total_bytes);
+
+                                cursor_hash = Some(hash_pixels(pixels_slice));
+
+                                if !user_data.cursor_hashes.contains(&cursor_hash.unwrap()) {
+                                    let pixels_data = pixels_slice.to_vec();
+
+                                    // TODO : bitmap position
+                                    if let Some(image_buffer) = image::ImageBuffer::<
+                                        image::Rgba<u8>,
+                                        _,
+                                    >::from_raw(
+                                        width, height, pixels_data
+                                    ) {
+                                        match image_buffer.save(CursorFile::img_path(
+                                            &user_data.temp_filename,
+                                            cursor_hash.unwrap(),
+                                        )) {
+                                            Ok(_) => {
+                                                user_data.cursor_hashes.push(cursor_hash.unwrap());
+                                            }
+                                            Err(e) => tracing::error!(
+                                                "failed to save cursor image : {:?}",
+                                                e
+                                            ),
+                                        }
+                                    } else {
+                                        tracing::error!("failed to crate image buffer for cursor");
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
@@ -433,15 +440,21 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                     user_data.last_cursor_pts = relative_pts;
 
                     tracing::debug!(
-                        "cursor x={} y={} (pts={:?})",
+                        "cursor x={} y={} (pts={:?}) {:?}",
                         (*cursor).position.x,
                         (*cursor).position.y,
-                        gst::ClockTime::from_nseconds(relative_pts)
+                        gst::ClockTime::from_nseconds(relative_pts),
+                        *cursor
                     );
                     let mut file = cursor_file.borrow_mut();
                     // TODO: calculate hash of bitmap to identify it, create corresponding png's
                     // FIX: incorrect position in window if really out of window
-                    file.write(relative_pts, (*cursor).position.x, (*cursor).position.y);
+                    file.write(
+                        relative_pts,
+                        (*cursor).position.x,
+                        (*cursor).position.y,
+                        cursor_hash,
+                    );
                 }
             }
 
@@ -552,4 +565,12 @@ fn create_meta_pod(value_id: u32) -> &'static spa::pod::Pod {
         }],
     };
     pod_from_object(obj)
+}
+
+fn hash_pixels(pixels: &[u8]) -> u64 {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    pixels.hash(&mut hasher);
+    hasher.finish()
 }

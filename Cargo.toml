@@ -27,3 +27,4 @@ gst-controller = { package = "gstreamer-controller", version = "0.25" }
 tracing = "0.1.37"
 tracing-subscriber = "0.3"
 derivative = "2.2.0"
+image = "0.25.10"

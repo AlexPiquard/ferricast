@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+use std::collections::HashSet;
 use std::ops::AddAssign;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -5,15 +7,15 @@ use std::rc::Rc;
 use anyhow::Result;
 use anyhow::bail;
 use derivative::Derivative;
+use ges::Layer;
 use ges::prelude::*;
 use gst_controller::prelude::*;
 use std::fs::File;
 use std::io::Read;
 
-use crate::config::PATH_ID;
+use crate::core::cursor::CursorEntry;
+use crate::core::cursor::CursorFile;
 use crate::core::rdp;
-use crate::core::rdp::CursorEntry;
-use crate::core::rdp::adjust_cursor_for_image;
 
 pub const ZOOM_ANIMATION_NSEC: u64 = 1_000_000_000;
 pub const RESIZE_HANDLE_SIZE: f64 = 10.0;
@@ -122,7 +124,10 @@ type ZoomControlSourcesArray = [(
 struct CursorControlSources {
     posx: gst_controller::InterpolationControlSource,
     posy: gst_controller::InterpolationControlSource,
+    alpha: gst_controller::InterpolationControlSource,
 }
+
+type CursorControlSourcesTypes = HashMap<u64, CursorControlSources>;
 
 pub type OnCursorToggle = Option<Rc<dyn Fn(bool) + 'static>>;
 
@@ -140,19 +145,18 @@ pub struct Video {
     zoom_effects: Vec<ZoomEffect>,
     cursor_enabled: bool,
     cursor_smoothing: f64,
-    cursor_show: bool,
-    cursor_cs: CursorControlSources,
-    cursor_clip: Option<ges::Clip>,
-    cursor_width: f64,
-    cursor_height: f64,
+    cursor_show: bool, // TODO: apply these settings to render
+    cursor_cs: CursorControlSourcesTypes,
+    cursor_layers: HashMap<u64, Layer>,
+    cursor_used_entries: Vec<usize>,
     cursor_entries: Vec<CursorEntry>,
-    all_cursor_entries: Vec<CursorEntry>,
 
     #[derivative(Debug = "ignore")]
     cursor_on_toggle: OnCursorToggle,
 }
 
 impl Video {
+    // PERF: opening delayed
     pub fn try_new<F>(recording_file: PathBuf, on_cursor_toggle: Option<F>) -> Result<Self>
     where
         F: Fn(bool) + 'static,
@@ -175,7 +179,7 @@ impl Video {
         );
 
         let layer_video = timeline.append_layer();
-        layer_video.set_priority(1);
+        layer_video.set_priority(100);
 
         let Ok(recording_file) = recording_file.canonicalize() else {
             bail!("unknown file {:?}", recording_file.to_str().unwrap())
@@ -219,14 +223,12 @@ impl Video {
         video_clip.set_child_property("fheight", video_height as f32)?;
 
         let cursor_smoothing = 50.0;
-        let cursor_width = 0.0;
-        let cursor_height = 0.0;
 
-        let cursor_entries =
+        let (cursor_entries, cursor_type_entries) =
             read_cursor_entries(recording_file.with_extension("curs").to_str().unwrap())
                 .unwrap_or_else(|err| {
                     tracing::warn!("failed to read cursor entries: {:?}", err);
-                    Vec::new()
+                    (Vec::new(), Vec::new())
                 });
 
         let mut s = Self {
@@ -243,15 +245,13 @@ impl Video {
             cursor_on_toggle: on_cursor_toggle.map(|f| Rc::new(f) as Rc<dyn Fn(bool)>),
             cursor_smoothing,
             cursor_show: true,
-            cursor_cs: CursorControlSources::default(),
-            cursor_clip: None,
-            cursor_width,
-            cursor_height,
-            all_cursor_entries: cursor_entries.clone(),
-            cursor_entries,
+            cursor_cs: CursorControlSourcesTypes::new(),
+            cursor_layers: HashMap::new(),
+            cursor_entries: cursor_entries,
+            cursor_used_entries: Vec::new(),
         };
 
-        s.setup_cursor()?;
+        s.setup_cursor(cursor_type_entries)?;
         if !s.cursor_enabled {
             layer_video.set_priority(0);
         }
@@ -314,17 +314,19 @@ impl Video {
         self.redraw_cursor();
     }
 
-    pub fn set_cursor_show(&mut self, value: bool) {
+    pub fn set_cursor_show(&mut self, value: bool) -> Result<()> {
         self.cursor_show = value;
-        if let Some(cursor_clip) = &self.cursor_clip {
-            cursor_clip.set_duration(if value {
-                self.video_duration
-            } else {
-                Some(gst::ClockTime::ZERO)
-            });
+        if value {
+            // PERF:
+            self.update_cursor_types();
+        } else {
+            for (_, cs) in self.cursor_cs.iter() {
+                cs.alpha.unset_all();
+                cs.alpha.set(gst::ClockTime::ZERO, 0.0);
+            }
         }
-        self.redraw_cursor();
         self.timeline().commit();
+        Ok(())
     }
 
     pub fn duration(&self) -> Option<gst::ClockTime> {
@@ -343,77 +345,130 @@ impl Video {
         self.cursor_show
     }
 
-    pub fn set_cursor_enabled(&mut self, enabled: bool) {
-        if !enabled {
-            self.cursor_show = enabled;
-        }
+    pub fn set_cursor_enabled(&mut self, enabled: bool) -> Result<()> {
+        self.set_cursor_show(enabled)?;
         self.cursor_enabled = enabled;
         if let Some(callback) = self.cursor_on_toggle.as_ref() {
             callback(enabled);
         }
+        Ok(())
     }
 
-    fn setup_cursor(&mut self) -> anyhow::Result<()> {
+    fn setup_cursor(&mut self, cursor_type_entries: Vec<usize>) -> anyhow::Result<()> {
         if !self.cursor_enabled {
             return Ok(());
         }
         if !self.recording_file.with_extension("curs").exists() {
-            self.set_cursor_enabled(false);
+            self.set_cursor_enabled(false)?;
             tracing::warn!(
                 "curs file not found for provided recording file, cursor features are disabled"
             );
             return Ok(());
         }
 
-        let layer_overlay = self.timeline().append_layer();
-        layer_overlay.set_priority(0);
-        let img_uri = &format!("resource://{}cursors/cursor.svg", *PATH_ID);
+        let mut i = 0;
+        for cursor_index in cursor_type_entries {
+            let cursor = self.cursor_entries[cursor_index];
+            self.add_cursor_img_layer(i, cursor.cursor_type_hash.unwrap())?;
+            i += 1;
+        }
+
+        self.update_cursor_smoothing();
+        self.update_cursor_types();
+        self.redraw_cursor();
+
+        Ok(())
+    }
+
+    fn add_cursor_img_layer(&mut self, index: usize, hash: u64) -> Result<()> {
+        let layer = self.timeline().append_layer();
+        layer.set_priority(index as u32);
+
+        let img_uri = format!(
+            "file://{}",
+            CursorFile::img_path(&self.recording_file, hash)
+        );
         let img_asset =
-            ges::UriClipAsset::request_sync(img_uri).expect("cant find cursor image file");
+            ges::UriClipAsset::request_sync(img_uri.as_ref()).expect("cant find cursor image file");
         let img_info = img_asset.info().video_streams()[0].clone();
 
-        let img_clip = layer_overlay
-            .add_asset(
-                &img_asset,
-                gst::ClockTime::ZERO,
-                gst::ClockTime::ZERO,
-                self.video_duration,
-                ges::TrackType::VIDEO,
-            )
-            .unwrap();
+        let img_clip = match layer.add_asset(
+            &img_asset,
+            gst::ClockTime::ZERO,
+            gst::ClockTime::ZERO,
+            self.video_duration,
+            ges::TrackType::VIDEO,
+        ) {
+            Ok(clip) => clip,
+            Err(err) => {
+                tracing::error!("failed to add cursor {}: {}", hash, err.message);
+                return Ok(());
+            }
+        };
 
-        self.cursor_width = img_info.width() as f64 * 0.2;
-        self.cursor_height = img_info.height() as f64 * 0.2;
-        img_clip.set_child_property("fwidth", self.cursor_width)?;
-        img_clip.set_child_property("fheight", self.cursor_height)?;
+        // TODO: setting for width and height of cursor
+        let cursor_width = img_info.width() as f64 * 3.0;
+        let cursor_height = img_info.height() as f64 * 3.0;
+        img_clip.set_child_property("fwidth", cursor_width)?;
+        img_clip.set_child_property("fheight", cursor_height)?;
 
         let track_element = img_clip
             .children(true)
             .into_iter()
             .find(|child| child.is::<ges::VideoUriSource>())
             .expect("failed to find video in image clip");
-        self.cursor_cs = CursorControlSources {
+        let cursor_cs = CursorControlSources {
             posx: gst_controller::InterpolationControlSource::new(),
             posy: gst_controller::InterpolationControlSource::new(),
+            alpha: gst_controller::InterpolationControlSource::new(),
         };
-        self.cursor_cs
+        cursor_cs
             .posx
             .set_property("mode", gst_controller::InterpolationMode::CubicMonotonic);
-        self.cursor_cs
+        cursor_cs
             .posy
             .set_property("mode", gst_controller::InterpolationMode::CubicMonotonic);
 
-        self.update_cursor_offset();
-        self.update_cursor_smoothing();
-        self.redraw_cursor();
-
         if let Ok(track_element) = track_element.clone().dynamic_cast::<ges::TrackElement>() {
-            track_element.set_control_source(&self.cursor_cs.posx, "posx", "direct-absolute");
-            track_element.set_control_source(&self.cursor_cs.posy, "posy", "direct-absolute");
+            track_element.set_control_source(&cursor_cs.posx, "posx", "direct-absolute");
+            track_element.set_control_source(&cursor_cs.posy, "posy", "direct-absolute");
+            track_element.set_control_source(&cursor_cs.alpha, "alpha", "direct-absolute");
         }
 
-        self.cursor_clip = Some(img_clip);
+        self.cursor_cs.insert(hash, cursor_cs);
+        self.cursor_layers.insert(hash, layer);
+
         Ok(())
+    }
+
+    // FIX: no cursor at beginning
+    // PERF: freeze
+    fn update_cursor_types(&self) {
+        for (_, cs) in self.cursor_cs.iter() {
+            cs.alpha.set(gst::ClockTime::ZERO, 0.0);
+        }
+        let mut prev_hash: Option<u64> = None;
+        for cursor in self.cursor_entries.iter() {
+            let Some(hash) = cursor.cursor_type_hash else {
+                continue;
+            };
+
+            let clocktime = gst::ClockTime::from_nseconds(cursor.pts as u64);
+
+            if let Some(prev_hash) = prev_hash
+                && let Some(prev) = self.cursor_cs.get(&prev_hash)
+            {
+                if prev_hash == hash {
+                    continue;
+                }
+                prev.alpha.set(clocktime, 0.0);
+            }
+
+            if let Some(cur) = self.cursor_cs.get(&hash) {
+                cur.alpha.set(clocktime, 1.0);
+                prev_hash = Some(hash);
+            }
+        }
     }
 
     fn foreach_frame<F>(&self, run: F)
@@ -440,18 +495,22 @@ impl Video {
     }
 
     pub fn redraw_cursor(&mut self) {
-        if !self.cursor_enabled {
-            return;
+        for (_, cs) in self.cursor_cs.iter() {
+            self.redraw_cursor_type(cs);
         }
-        if !self.cursor_show {
-            self.cursor_cs.posx.unset_all();
-            self.cursor_cs.posy.unset_all();
+    }
+
+    fn redraw_cursor_type(&self, cursor_cs: &CursorControlSources) {
+        if !self.cursor_enabled {
             return;
         }
 
         self.foreach_frame(|current_clocktime, current_pts| {
-            let (curr_x, curr_y) =
-                rdp::get_position_at_time(&self.cursor_entries, current_pts as f64);
+            let (curr_x, curr_y) = rdp::get_position_at_time(
+                &self.cursor_entries,
+                &self.cursor_used_entries,
+                current_pts as f64,
+            );
 
             let top = self.zoom_value_at("top", current_clocktime).unwrap_or(0.0);
             let bottom = self
@@ -467,24 +526,29 @@ impl Video {
             let scale_x = self.video_width as f64 / visible_width;
             let scale_y = self.video_height as f64 / visible_height;
 
+            // TODO: add offset
             let final_x = (curr_x - left) * scale_x;
             let final_y = (curr_y - top) * scale_y;
-            self.cursor_cs.posx.set(current_clocktime, final_x);
-            self.cursor_cs.posy.set(current_clocktime, final_y);
+            cursor_cs.posx.set(current_clocktime, final_x);
+            cursor_cs.posy.set(current_clocktime, final_y);
         });
     }
 
-    fn update_cursor_offset(&mut self) {
-        adjust_cursor_for_image(
-            &mut self.all_cursor_entries,
-            self.cursor_width * 0.3975,
-            self.cursor_height * 0.1233,
-        );
-    }
+    // fn update_cursor_offset(&mut self, cursor_width: f64, cursor_height: f64) {
+    //     adjust_cursor_for_image(
+    //         &mut self.all_cursor_entries,
+    //         cursor_width * 0.3975,
+    //         cursor_height * 0.1233,
+    //     );
+    // }
 
     fn update_cursor_smoothing(&mut self) {
-        self.cursor_entries = self.all_cursor_entries.clone();
-        simplify_entries(&mut self.cursor_entries, self.cursor_smoothing);
+        self.cursor_used_entries = rdp::ramer_douglas_peucker(
+            &self.cursor_entries,
+            0,
+            self.cursor_entries.len() - 1,
+            self.cursor_smoothing,
+        );
     }
 
     fn setup_zoom(
@@ -684,36 +748,38 @@ impl Video {
     }
 }
 
-fn read_cursor_entries(path: &str) -> anyhow::Result<Vec<CursorEntry>> {
+fn read_cursor_entries(path: &str) -> anyhow::Result<(Vec<CursorEntry>, Vec<usize>)> {
     let mut file = File::open(path)?;
     let mut data = Vec::new();
     file.read_to_end(&mut data)?;
 
+    let mut hashes: HashSet<u64> = HashSet::new();
+    let mut types: Vec<usize> = Vec::new();
+    let mut i = 0;
     let entries: Vec<CursorEntry> = data
-        .chunks_exact(16)
+        .chunks_exact(24)
         .map(|chunk| {
+            let raw_hash = u64::from_le_bytes(chunk[16..24].try_into().unwrap());
+            let cursor_type_hash = if raw_hash == 0 { None } else { Some(raw_hash) };
+
+            if let Some(hash) = cursor_type_hash
+                && hashes.insert(hash)
+            {
+                types.push(i);
+            }
+
+            i += 1;
+
             CursorEntry::new(
                 u64::from_le_bytes(chunk[0..8].try_into().unwrap()),
                 i32::from_le_bytes(chunk[8..12].try_into().unwrap()),
                 i32::from_le_bytes(chunk[12..16].try_into().unwrap()),
+                cursor_type_hash,
             )
         })
         .collect();
 
-    Ok(entries)
-}
-
-/// Use ramer-douglas-peucker algorithm to get a simplified curve
-fn simplify_entries(entries: &mut Vec<CursorEntry>, cursor_smoothing: f64) {
-    let remaining_index =
-        rdp::ramer_douglas_peucker(entries, 0, entries.len() - 1, cursor_smoothing);
-
-    let mut i: usize = 0;
-    entries.retain(|_| {
-        let retain = remaining_index.contains(&i);
-        i += 1;
-        retain
-    });
+    Ok((entries, types))
 }
 
 fn video_track_element(video_uriclip: &ges::UriClip) -> ges::TrackElement {

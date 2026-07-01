@@ -77,6 +77,7 @@ mod imp {
             self.pango_layout.replace(Some(layout));
         }
 
+        // TODO: show timecodes
         fn snapshot(&self, snapshot: &gtk::Snapshot) {
             if self.video.get().is_none() {
                 return;
