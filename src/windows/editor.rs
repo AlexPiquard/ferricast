@@ -181,11 +181,27 @@ mod imp {
                 return;
             };
 
-            self.timeline_widget.imp().setup(self.video_rc());
+            self.idle_setup();
+        }
 
-            self.set_initial_values();
-            self.video().start();
-            self.after_setup();
+        fn idle_setup(&self) {
+            let this = self.obj().downgrade();
+            let video_rc = self.video_rc();
+            glib::idle_add_local(move || {
+                let Some(this) = this.upgrade() else {
+                    return glib::ControlFlow::Break;
+                };
+                if let Err(e) = video_rc.borrow_mut().setup_cursor() {
+                    // TODO: use error when consequence is visible (verify everywhere)
+                    tracing::error!("failed to setup video cursor: {:?}", e);
+                }
+
+                this.imp().timeline_widget.imp().setup(video_rc.clone());
+                this.imp().set_initial_values();
+                video_rc.borrow().start();
+                this.imp().after_setup();
+                glib::ControlFlow::Break
+            });
         }
 
         fn after_setup(&self) {

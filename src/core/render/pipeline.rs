@@ -56,6 +56,7 @@ impl Render {
 
     fn setup(&mut self) -> anyhow::Result<()> {
         let mut timeline = video::Video::try_new(self.input.clone(), None::<fn(bool)>)?;
+        timeline.setup_cursor()?;
         timeline.apply_zoom_effects(&self.zoom_effects)?;
         timeline.redraw_cursor();
         self.pipeline = Some(timeline.pipeline());

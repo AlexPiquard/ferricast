@@ -156,7 +156,6 @@ pub struct Video {
 }
 
 impl Video {
-    // PERF: opening delayed
     pub fn try_new<F>(recording_file: PathBuf, on_cursor_toggle: Option<F>) -> Result<Self>
     where
         F: Fn(bool) + 'static,
@@ -224,14 +223,7 @@ impl Video {
 
         let cursor_smoothing = 50.0;
 
-        let (cursor_entries, cursor_type_entries) =
-            read_cursor_entries(recording_file.with_extension("curs").to_str().unwrap())
-                .unwrap_or_else(|err| {
-                    tracing::warn!("failed to read cursor entries: {:?}", err);
-                    (Vec::new(), Vec::new())
-                });
-
-        let mut s = Self {
+        Ok(Self {
             pipeline,
             recording_file,
             video_uriclip,
@@ -247,16 +239,22 @@ impl Video {
             cursor_show: true,
             cursor_cs: CursorControlSourcesTypes::new(),
             cursor_layers: HashMap::new(),
-            cursor_entries: cursor_entries,
+            cursor_entries: Vec::new(),
             cursor_used_entries: Vec::new(),
-        };
+        })
+    }
 
-        s.setup_cursor(cursor_type_entries)?;
-        if !s.cursor_enabled {
-            layer_video.set_priority(0);
-        }
+    pub fn setup_cursor(&mut self) -> Result<()> {
+        let (cursor_entries, cursor_type_entries) =
+            read_cursor_entries(self.recording_file.with_extension("curs").to_str().unwrap())
+                .unwrap_or_else(|err| {
+                    tracing::warn!("failed to read cursor entries: {:?}", err);
+                    (Vec::new(), Vec::new())
+                });
 
-        Ok(s)
+        self.cursor_entries = cursor_entries;
+        self.setup_cursor_entries(cursor_type_entries)?;
+        Ok(())
     }
 
     pub fn timeline(&self) -> ges::Timeline {
@@ -354,7 +352,7 @@ impl Video {
         Ok(())
     }
 
-    fn setup_cursor(&mut self, cursor_type_entries: Vec<usize>) -> anyhow::Result<()> {
+    fn setup_cursor_entries(&mut self, cursor_type_entries: Vec<usize>) -> anyhow::Result<()> {
         if !self.cursor_enabled {
             return Ok(());
         }
