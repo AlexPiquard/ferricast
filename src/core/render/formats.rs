@@ -159,7 +159,7 @@ impl PipelineSpec for Gif {
         let tmp_path = self.tmp_path(output);
         let sink_bin = pipeline.property::<gst::Bin>("video-sink");
         let Some(filesink) = sink_bin.by_name("filesink") else {
-            tracing::warn!("failed to retrieve filesink after rendering");
+            tracing::error!("failed to retrieve filesink after rendering");
             return Ok(());
         };
         self.run_gifski(

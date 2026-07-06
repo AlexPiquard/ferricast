@@ -18,7 +18,7 @@ pub fn render<F>(
     let mut render = Render::new(settings, input, output, zoom_effects);
     render.on_progress(on_progress);
     if let Err(e) = render.start() {
-        tracing::warn!("failed to render: {:?}", e);
+        tracing::error!("failed to render: {:?}", e);
     }
 }
 
@@ -49,7 +49,7 @@ impl Render {
             on_progress: None,
         };
         if let Err(e) = s.setup() {
-            tracing::warn!("failed to setup render pipeline: {:?}", e);
+            tracing::error!("failed to setup render pipeline: {:?}", e);
         }
         s
     }
@@ -101,7 +101,7 @@ impl Render {
             );
 
             if !pipeline.send_event(seek_event) {
-                tracing::warn!("failed to send seek event");
+                tracing::error!("failed to send seek event");
             }
         }
 

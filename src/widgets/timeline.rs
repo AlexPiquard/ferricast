@@ -302,7 +302,7 @@ mod imp {
                         state.original_start_nsec,
                         state.original_end_nsec,
                     ) {
-                        tracing::warn!("failed to apply zoom effect changes: {:?}", e);
+                        tracing::error!("failed to apply zoom effect changes: {:?}", e);
                     }
                 }
 
@@ -333,13 +333,13 @@ mod imp {
                             if let Err(e) =
                                 video.update_zoom_geometry(effect_id, factor, pos_x, pos_y)
                             {
-                                tracing::warn!("failed to apply zoom effect changes: {:?}", e);
+                                tracing::error!("failed to apply zoom effect changes: {:?}", e);
                             }
                         },
                         move || {
                             let mut video = this_remove.imp().video_mut();
                             if let Err(e) = video.remove_zoom(effect_id) {
-                                tracing::warn!("failed to remove zoom effect: {:?}", e);
+                                tracing::error!("failed to remove zoom effect: {:?}", e);
                             }
                         },
                     );

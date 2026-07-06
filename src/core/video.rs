@@ -532,14 +532,6 @@ impl Video {
         });
     }
 
-    // fn update_cursor_offset(&mut self, cursor_width: f64, cursor_height: f64) {
-    //     adjust_cursor_for_image(
-    //         &mut self.all_cursor_entries,
-    //         cursor_width * 0.3975,
-    //         cursor_height * 0.1233,
-    //     );
-    // }
-
     fn update_cursor_smoothing(&mut self) {
         self.cursor_used_entries = rdp::ramer_douglas_peucker(
             &self.cursor_entries,

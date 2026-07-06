@@ -116,9 +116,10 @@ mod imp {
                 (gst::State::Paused, "media-playback-start-symbolic")
             };
             if let Err(e) = pipeline.set_state(state) {
-                tracing::warn!("failed to change pipeline state to {:?}: {:#?}", state, e);
+                tracing::error!("failed to change pipeline state to {:?}: {:#?}", state, e);
+            } else {
+                button.set_icon_name(icon);
             }
-            button.set_icon_name(icon);
         }
         // TODO: buttons to go before and after : +/- 10% of duration ?
 
@@ -132,7 +133,7 @@ mod imp {
         #[template_callback]
         fn handle_zoom_clicked(&self) {
             let Some(current_pos) = self.video().current_position_nsec() else {
-                tracing::warn!("failed to get current timeline position");
+                tracing::error!("failed to get current timeline position");
                 return;
             };
 
@@ -143,7 +144,7 @@ mod imp {
                 pos_x: 0.5,
                 pos_y: 0.5,
             }) {
-                tracing::warn!("failed to add zoom: {:#?}", err);
+                tracing::error!("failed to add zoom: {:#?}", err);
                 return;
             }
 
@@ -164,7 +165,7 @@ mod imp {
                 return;
             }
             if let Err(e) = self.video_mut().set_cursor_show(switch.is_active()) {
-                tracing::warn!("failed to hide/show cursor: {:?}", e);
+                tracing::error!("failed to hide/show cursor: {:?}", e);
             }
         }
     }
@@ -192,7 +193,6 @@ mod imp {
                     return glib::ControlFlow::Break;
                 };
                 if let Err(e) = video_rc.borrow_mut().setup_cursor() {
-                    // TODO: use error when consequence is visible (verify everywhere)
                     tracing::error!("failed to setup video cursor: {:?}", e);
                 }
 

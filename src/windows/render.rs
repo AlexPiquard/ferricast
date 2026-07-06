@@ -98,7 +98,7 @@ mod imp {
                 return;
             };
             let Ok(directory) = File::open(output_directory_path) else {
-                tracing::warn!("failed to open output directory");
+                tracing::error!("failed to open output directory");
                 return;
             };
 
@@ -107,7 +107,7 @@ mod imp {
                     .send(&directory.as_fd())
                     .await
                 {
-                    tracing::warn!("failed to open output directory: {:?}", e);
+                    tracing::error!("failed to open output directory: {:?}", e);
                 }
             });
         }
@@ -118,7 +118,7 @@ mod imp {
                 return;
             };
             let Ok(file) = File::open(output_file) else {
-                tracing::warn!("failed to open output file");
+                tracing::error!("failed to open output file");
                 return;
             };
 
@@ -128,7 +128,7 @@ mod imp {
                     .send_file(&file.as_fd())
                     .await
                 {
-                    tracing::warn!("failed to open output file: {:?}", e);
+                    tracing::error!("failed to open output file: {:?}", e);
                 }
             });
         }

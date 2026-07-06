@@ -237,14 +237,14 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                     .unwrap()
                     .push_buffer(gst_buffer)
                 {
-                    tracing::warn!("GStreamer error when pushing last video buffer: {:?}", e);
+                    tracing::error!("GStreamer error when pushing last video buffer: {:?}", e);
                 } else {
                     tracing::debug!("pushed last buffer (pts={:?})", expected_pts);
                 }
             }
 
             if let Err(e) = user_data.video_appsrc.as_ref().unwrap().end_of_stream() {
-                tracing::warn!("failed to send end of stream event: {:?}", e);
+                tracing::error!("failed to send end of stream event: {:?}", e);
             }
         })
         .param_changed(move |_, user_data, id, param| {
@@ -359,7 +359,6 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                                 if !user_data.cursor_hashes.contains(&cursor_hash.unwrap()) {
                                     let pixels_data = pixels_slice.to_vec();
 
-                                    // TODO : bitmap position
                                     if let Some(image_buffer) = image::ImageBuffer::<
                                         image::Rgba<u8>,
                                         _,
@@ -412,7 +411,7 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                     user_data.last_buffer_pts = relative_pts;
 
                     let Ok(mut gst_buffer) = gst::Buffer::with_size(size) else {
-                        tracing::warn!("failed to allocate gst buffer");
+                        tracing::error!("failed to allocate gst buffer");
                         return;
                     };
                     if let Some(gst_buffer_mut) = gst_buffer.get_mut() {
@@ -427,7 +426,7 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                         .unwrap()
                         .push_buffer(gst_buffer)
                     {
-                        tracing::warn!("GStreamer error when pushing video buffer: {:?}", e);
+                        tracing::error!("GStreamer error when pushing video buffer: {:?}", e);
                     } else {
                         tracing::debug!("pushed buffer (pts={:?})", gst_pts);
                     }
@@ -447,7 +446,6 @@ pub fn start_screencast(node_id: u32, fd: OwnedFd, temp_filename: PathBuf) -> an
                         *cursor
                     );
                     let mut file = cursor_file.borrow_mut();
-                    // TODO: calculate hash of bitmap to identify it, create corresponding png's
                     // FIX: incorrect position in window if really out of window
                     file.write(
                         relative_pts,
