@@ -685,6 +685,26 @@ impl Video {
         Ok(())
     }
 
+    pub fn update_cursor_size(&mut self, size: u32) -> Result<()> {
+        for (_, layer) in self.cursor_layers.iter() {
+            let clips = layer.clips();
+            let Some(clip) = clips.iter().next() else {
+                continue;
+            };
+            let Some(asset) = clip.asset() else {
+                continue;
+            };
+            let uriclip_asset = asset
+                .downcast_ref::<ges::UriClipAsset>()
+                .ok_or_else(|| anyhow::anyhow!("not a UriClipAsset"))?;
+            let video_info = uriclip_asset.info().video_streams()[0].clone();
+            clip.set_child_property("fwidth", video_info.width() * size)?;
+            clip.set_child_property("fheight", video_info.width() * size)?;
+        }
+        self.timeline().commit();
+        Ok(())
+    }
+
     pub fn remove_zoom(&mut self, zoom_id: usize) -> Result<()> {
         let Some(zoom) = self.zoom_effect(zoom_id) else {
             bail!("cant find zoom with id {}", zoom_id);

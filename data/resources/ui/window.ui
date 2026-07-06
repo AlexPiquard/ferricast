@@ -20,9 +20,6 @@
     </section>
   </menu>
   <template class="MainWindow" parent="AdwApplicationWindow">
-    <property name="default-height">200</property>
-    <property name="default-width">500</property>
-    <property name="title">Ferricast</property>
     <property name="content">
       <object class="AdwToolbarView">
         <property name="content">
@@ -66,14 +63,17 @@
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Main Menu</property>
-                <property name="primary">true</property>
                 <property name="menu-model">primary_menu</property>
+                <property name="primary">true</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
               </object>
             </child>
           </object>
         </child>
       </object>
     </property>
+    <property name="default-height">200</property>
+    <property name="default-width">500</property>
+    <property name="title">Ferricast</property>
   </template>
 </interface>

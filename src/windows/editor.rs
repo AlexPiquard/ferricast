@@ -43,9 +43,11 @@ mod imp {
         #[template_child]
         pub timeline_widget: TemplateChild<timeline::Timeline>,
         #[template_child]
-        pub cursor_smoothing_scale: TemplateChild<gtk::Scale>,
+        pub cursor_smoothing_spin: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub cursor_show: TemplateChild<adw::SwitchRow>,
+        #[template_child]
+        pub cursor_size_spin: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub render_button: TemplateChild<gtk::Button>,
         pub ready: Cell<bool>,
@@ -108,6 +110,7 @@ mod imp {
     impl EditorWindow {
         #[template_callback]
         fn handle_pause_clicked(&self, button: &gtk::Button) {
+            // TODO: disable pause and other buttons when loading
             let pipeline = self.video().pipeline();
             let (_, state, _) = pipeline.state(gst::ClockTime::ZERO);
             let (state, icon) = if state == gst::State::Paused {
@@ -152,7 +155,7 @@ mod imp {
         }
 
         #[template_callback]
-        fn handle_cursor_smoothing_changed(&self, scale: &gtk::Scale) {
+        fn handle_cursor_smoothing_changed(&self, scale: &adw::SpinRow) {
             if !self.ready.get() {
                 return;
             }
@@ -166,6 +169,13 @@ mod imp {
             }
             if let Err(e) = self.video_mut().set_cursor_show(switch.is_active()) {
                 tracing::error!("failed to hide/show cursor: {:?}", e);
+            }
+        }
+
+        #[template_callback]
+        fn handle_cursor_size_changed(&self, spin: &adw::SpinRow) {
+            if let Err(e) = self.video_mut().update_cursor_size(spin.value() as u32) {
+                tracing::error!("failed to change cursor size: {:?}", e);
             }
         }
     }
@@ -247,8 +257,11 @@ mod imp {
             let video = Video::try_new(
                 recording_file,
                 Some(move |enabled| {
+                    // TODO: message on top of cursor page to explain its disabled because of
+                    // missing curs file
                     this.imp().cursor_show.set_sensitive(enabled);
-                    this.imp().cursor_smoothing_scale.set_sensitive(enabled);
+                    this.imp().cursor_smoothing_spin.set_sensitive(enabled);
+                    this.imp().cursor_size_spin.set_sensitive(enabled);
                 }),
             )?;
             video.set_video_sink(&bin);
@@ -262,7 +275,7 @@ mod imp {
 
         fn set_initial_values(&self) {
             let video = self.video();
-            self.cursor_smoothing_scale
+            self.cursor_smoothing_spin
                 .set_value(video.cursor_smoothing());
             self.cursor_show.set_active(video.cursor_show());
         }

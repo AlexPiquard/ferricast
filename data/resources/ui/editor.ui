@@ -2,6 +2,7 @@
 <interface>
   <requires lib="gtk" version="4.18"/>
   <requires lib="libadwaita" version="1.4"/>
+  <requires lib="gio" version="2.0"/>
   <menu id="primary_menu">
     <section>
       <item>
@@ -19,12 +20,8 @@
     </section>
   </menu>
   <template class="EditorWindow" parent="AdwApplicationWindow">
-    <property name="default-height">800</property>
-    <property name="default-width">1200</property>
-    <property name="title" translatable="yes">Ferricast Editor</property>
     <property name="content">
       <object class="AdwToolbarView">
-        <property name="top-bar-style">raised</property>
         <property name="content">
           <object class="GtkPaned">
             <property name="end-child">
@@ -52,32 +49,47 @@
                               <object class="AdwSwitchRow" id="cursor_show">
                                 <property name="active">True</property>
                                 <property name="title" translatable="yes">Show cursor</property>
-                                <signal name="notify::active" handler="handle_cursor_switch" swapped="yes"/>
+                                <signal name="notify::active" handler="handle_cursor_switch" swapped="True"/>
                               </object>
                             </child>
                             <child>
-                              <object class="AdwActionRow">
-                                <property name="title" translatable="yes">Smoothing</property>
-                                <child>
-                                  <object class="GtkScale" id="cursor_smoothing_scale">
+                              <object class="AdwSpinRow" id="cursor_smoothing_spin">
                                     <property name="adjustment">
                                       <object class="GtkAdjustment">
                                         <property name="lower">0</property>
-                                        <property name="page-increment">10</property>
-                                        <property name="step-increment">1</property>
+                                        <property name="page-increment">100</property>
+                                        <property name="step-increment">10</property>
                                         <property name="upper">100</property>
                                         <property name="value">0</property>
                                       </object>
                                     </property>
-                                    <property name="digits">0</property>
-                                    <property name="draw-value">True</property>
-                                    <property name="hexpand">True</property>
-                                    <property name="orientation">horizontal</property>
-                                    <property name="value-pos">right</property>
-                                    <property name="width-request">150</property>
-                                    <signal name="value-changed" handler="handle_cursor_smoothing_changed" swapped="yes"/>
+                                <property name="can-focus">False</property>
+                                <property name="climb-rate">1.0</property>
+                                <property name="enable-undo">False</property>
+                                <property name="focus-on-click">False</property>
+                                <property name="focusable">False</property>
+                                <property name="title">Smoothing</property>
+                                <signal name="changed" handler="handle_cursor_smoothing_changed" swapped="True"/>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwSpinRow" id="cursor_size_spin">
+                                <property name="adjustment">
+                                  <object class="GtkAdjustment">
+                                    <property name="lower">1.0</property>
+                                    <property name="page-increment">10.0</property>
+                                    <property name="step-increment">1.0</property>
+                                    <property name="upper">10.0</property>
+                                    <property name="value">3.0</property>
                                   </object>
-                                </child>
+                                </property>
+                                <property name="can-focus">False</property>
+                                <property name="climb-rate">1.0</property>
+                                <property name="enable-undo">False</property>
+                                <property name="focus-on-click">False</property>
+                                <property name="focusable">False</property>
+                                <property name="title">Cursor size</property>
+                                <signal name="changed" handler="handle_cursor_size_changed" swapped="True"/>
                               </object>
                             </child>
                           </object>
@@ -127,7 +139,7 @@
                         <property name="spacing">20</property>
                         <child>
                           <object class="GtkButton" id="zoom_button">
-                            <signal name="clicked" handler="handle_zoom_clicked" swapped="yes"/>
+                            <signal name="clicked" handler="handle_zoom_clicked" swapped="True"/>
                             <child>
                               <object class="AdwButtonContent">
                                 <property name="icon-name">zoom-in-symbolic</property>
@@ -166,7 +178,7 @@
                         <property name="hexpand">True</property>
                         <property name="icon-name">media-playback-pause-symbolic</property>
                         <property name="valign">center</property>
-                        <signal name="clicked" handler="handle_pause_clicked" swapped="yes"/>
+                        <signal name="clicked" handler="handle_pause_clicked" swapped="True"/>
                         <style>
                           <class name="circular"/>
                           <class name="opaque"/>
@@ -194,20 +206,21 @@
             </property>
           </object>
         </property>
+        <property name="top-bar-style">raised</property>
         <child type="top">
           <object class="AdwHeaderBar">
             <child type="end">
               <object class="GtkMenuButton">
                 <property name="icon-name">open-menu-symbolic</property>
-                <property name="tooltip-text" translatable="yes">Main Menu</property>
-                <property name="primary">true</property>
                 <property name="menu-model">primary_menu</property>
+                <property name="primary">true</property>
+                <property name="tooltip-text" translatable="yes">Main Menu</property>
               </object>
             </child>
             <child type="end">
               <object class="GtkButton" id="render_button">
                 <property name="sensitive">False</property>
-                <signal name="clicked" handler="handle_render_clicked" swapped="yes"/>
+                <signal name="clicked" handler="handle_render_clicked" swapped="True"/>
                 <child>
                   <object class="AdwButtonContent">
                     <property name="icon-name">camera-web-symbolic</property>
@@ -224,5 +237,8 @@
         </child>
       </object>
     </property>
+    <property name="default-height">800</property>
+    <property name="default-width">1200</property>
+    <property name="title" translatable="yes">Ferricast Editor</property>
   </template>
 </interface>
