@@ -439,7 +439,7 @@ mod imp {
 
             let this = self.obj().clone();
             motion.connect_motion(move |_controller, x, _y| {
-                if this.imp().drag_state.borrow().is_some() {
+                if this.imp().drag_state.borrow().is_some() || this.imp().video.get().is_none() {
                     return;
                 }
 

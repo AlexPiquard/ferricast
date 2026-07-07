@@ -50,6 +50,8 @@ mod imp {
         pub cursor_size_spin: TemplateChild<adw::SpinRow>,
         #[template_child]
         pub render_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub pause_button: TemplateChild<gtk::Button>,
         pub ready: Cell<bool>,
         pub video: OnceCell<Rc<RefCell<Video>>>,
         render_settings: RefCell<render::RenderSettings>,
@@ -217,6 +219,7 @@ mod imp {
         fn after_setup(&self) {
             self.ready.set(true);
             self.render_button.set_sensitive(true);
+            self.pause_button.set_sensitive(true);
         }
 
         pub fn video_rc(&self) -> Rc<RefCell<Video>> {
