@@ -404,7 +404,6 @@ impl Video {
             }
         };
 
-        // TODO: setting for width and height of cursor
         let cursor_width = img_info.width() as f64 * 3.0;
         let cursor_height = img_info.height() as f64 * 3.0;
         img_clip.set_child_property("fwidth", cursor_width)?;

@@ -27,7 +27,6 @@ mod imp {
     use gtk::CompositeTemplate;
     use gtk::gio;
     use gtk::glib;
-    use std::cell::Cell;
     use std::cell::OnceCell;
     use std::cell::Ref;
     use std::cell::RefCell;
@@ -52,13 +51,11 @@ mod imp {
         pub render_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub pause_button: TemplateChild<gtk::Button>,
-        pub ready: Cell<bool>,
         pub video: OnceCell<Rc<RefCell<Video>>>,
         render_settings: RefCell<render::RenderSettings>,
         settings: OnceCell<gio::Settings>,
         // TODO: choose cursor file and adjust pointer (0 -> 1), or predefined cursors
         // -> one cursor per state : input, drag, normal
-        // TODO: use timeline instead of ready ? but cant define timeline as last
     }
 
     #[glib::object_subclass]
@@ -112,7 +109,6 @@ mod imp {
     impl EditorWindow {
         #[template_callback]
         fn handle_pause_clicked(&self, button: &gtk::Button) {
-            // TODO: disable pause and other buttons when loading
             let pipeline = self.video().pipeline();
             let (_, state, _) = pipeline.state(gst::ClockTime::ZERO);
             let (state, icon) = if state == gst::State::Paused {
@@ -158,7 +154,7 @@ mod imp {
 
         #[template_callback]
         fn handle_cursor_smoothing_changed(&self, scale: &adw::SpinRow) {
-            if !self.ready.get() {
+            if !self.is_setup() {
                 return;
             }
             self.video_mut().set_cursor_smoothing(scale.value());
@@ -166,7 +162,7 @@ mod imp {
 
         #[template_callback]
         fn handle_cursor_switch(&self, _pspec: glib::ParamSpec, switch: &adw::SwitchRow) {
-            if !self.ready.get() {
+            if !self.is_setup() {
                 return;
             }
             if let Err(e) = self.video_mut().set_cursor_show(switch.is_active()) {
@@ -216,8 +212,11 @@ mod imp {
             });
         }
 
+        fn is_setup(&self) -> bool {
+            self.video.get().is_some()
+        }
+
         fn after_setup(&self) {
-            self.ready.set(true);
             self.render_button.set_sensitive(true);
             self.pause_button.set_sensitive(true);
         }
