@@ -12,6 +12,7 @@ mod imp {
     use crate::core::utils;
     use crate::core::video::Video;
     use crate::core::video::ZoomEffect;
+    use crate::widgets::timecode;
     use crate::widgets::timeline;
     use crate::windows;
     use adw::prelude::*;
@@ -51,6 +52,8 @@ mod imp {
         pub render_button: TemplateChild<gtk::Button>,
         #[template_child]
         pub pause_button: TemplateChild<gtk::Button>,
+        #[template_child]
+        pub timecode_widget: TemplateChild<timecode::Timecode>,
         pub video: OnceCell<Rc<RefCell<Video>>>,
         render_settings: RefCell<render::RenderSettings>,
         settings: OnceCell<gio::Settings>,
@@ -205,6 +208,7 @@ mod imp {
                 }
 
                 this.imp().timeline_widget.imp().setup(video_rc.clone());
+                this.imp().timecode_widget.imp().setup(video_rc.clone());
                 this.imp().set_initial_values();
                 video_rc.borrow().start();
                 this.imp().after_setup();
@@ -213,7 +217,7 @@ mod imp {
         }
 
         fn is_setup(&self) -> bool {
-            self.video.get().is_some()
+            self.render_button.is_sensitive()
         }
 
         fn after_setup(&self) {
@@ -256,6 +260,7 @@ mod imp {
             let paintable = sink.property::<gtk::gdk::Paintable>("paintable");
 
             let this = self.obj().clone();
+            // TODO: update timecode_button label
             let video = Video::try_new(
                 recording_file,
                 Some(move |enabled| {

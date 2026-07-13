@@ -343,6 +343,10 @@ impl Video {
         self.cursor_show
     }
 
+    pub fn framerate(&self) -> Option<gst::Fraction> {
+        self.video_framerate
+    }
+
     pub fn set_cursor_enabled(&mut self, enabled: bool) -> Result<()> {
         self.set_cursor_show(enabled)?;
         self.cursor_enabled = enabled;
