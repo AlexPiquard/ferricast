@@ -141,6 +141,7 @@ pub struct Video {
     video_height: u32,
     video_framerate: Option<gst::Fraction>,
     video_duration: Option<gst::ClockTime>,
+    video_layer: Layer,
     zoom_cs: ZoomControlSourcesArray,
     zoom_effects: Vec<ZoomEffect>,
     cursor_enabled: bool,
@@ -177,9 +178,6 @@ impl Video {
             gst::ElementFactory::make("videoconvert").build().unwrap(),
         );
 
-        let layer_video = timeline.append_layer();
-        layer_video.set_priority(100);
-
         let Ok(recording_file) = recording_file.canonicalize() else {
             bail!("unknown file {:?}", recording_file.to_str().unwrap())
         };
@@ -199,7 +197,8 @@ impl Video {
             .build();
         video_track.set_restriction_caps(&caps);
 
-        let video_clip = layer_video
+        let video_layer = timeline.append_layer();
+        let video_clip = video_layer
             .add_asset(
                 &video_asset,
                 gst::ClockTime::ZERO,
@@ -231,6 +230,7 @@ impl Video {
             video_height,
             video_framerate: Some(video_framerate),
             video_duration,
+            video_layer,
             zoom_cs,
             zoom_effects: Vec::new(),
             cursor_enabled: true,
@@ -320,12 +320,16 @@ impl Video {
     pub fn set_cursor_show(&mut self, value: bool) -> Result<()> {
         self.cursor_show = value;
         if value {
+            self.video_layer.set_priority(100);
             // PERF:
             self.update_cursor_types();
         } else {
             for (_, cs) in self.cursor_cs.iter() {
                 cs.alpha.unset_all();
                 cs.alpha.set(gst::ClockTime::ZERO, 0.0);
+            }
+            if self.cursor_cs.is_empty() {
+                self.video_layer.set_priority(0);
             }
         }
         self.timeline().commit();
