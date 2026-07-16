@@ -15,7 +15,8 @@
 		"--device=dri",
 		"--env=RUST_LOG=ferricast=debug",
 		"--env=G_MESSAGES_DEBUG=none",
-		"--env=RUST_BACKTRACE=1"
+		"--env=RUST_BACKTRACE=1",
+		"--env=GSK_RENDERER=gl"
 	],
 	"build-options": {
 		"append-path": "/usr/lib/sdk/rust-stable/bin:/usr/lib/sdk/llvm20/bin",
