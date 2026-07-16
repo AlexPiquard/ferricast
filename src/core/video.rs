@@ -245,12 +245,17 @@ impl Video {
     }
 
     pub fn setup_cursor(&mut self) -> Result<()> {
-        let (cursor_entries, cursor_type_entries) =
-            read_cursor_entries(self.recording_file.with_extension("curs").to_str().unwrap())
-                .unwrap_or_else(|err| {
-                    tracing::warn!("failed to read cursor entries: {:?}", err);
-                    (Vec::new(), Vec::new())
-                });
+        let curs_path = self.recording_file.with_extension("curs");
+        let curs_path_str = curs_path.to_str().unwrap();
+        if !self.recording_file.with_extension("curs").exists() {
+            self.set_cursor_enabled(false)?;
+            bail!(
+                "curs file not found at {}, cursor features are disabled",
+                curs_path_str
+            );
+        }
+
+        let (cursor_entries, cursor_type_entries) = read_cursor_entries(curs_path_str)?;
 
         self.cursor_entries = cursor_entries;
         self.setup_cursor_entries(cursor_type_entries)?;
@@ -358,13 +363,6 @@ impl Video {
 
     fn setup_cursor_entries(&mut self, cursor_type_entries: Vec<usize>) -> anyhow::Result<()> {
         if !self.cursor_enabled {
-            return Ok(());
-        }
-        if !self.recording_file.with_extension("curs").exists() {
-            self.set_cursor_enabled(false)?;
-            tracing::warn!(
-                "curs file not found for provided recording file, cursor features are disabled"
-            );
             return Ok(());
         }
 

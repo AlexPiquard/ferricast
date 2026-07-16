@@ -204,7 +204,7 @@ mod imp {
                     return glib::ControlFlow::Break;
                 };
                 if let Err(e) = video_rc.borrow_mut().setup_cursor() {
-                    tracing::error!("failed to setup video cursor: {:?}", e);
+                    tracing::warn!("failed to setup video cursor: {:?}", e);
                 }
 
                 this.imp().timeline_widget.imp().setup(video_rc.clone());
