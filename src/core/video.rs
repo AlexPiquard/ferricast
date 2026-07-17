@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use anyhow::Result;
+use anyhow::anyhow;
 use anyhow::bail;
 use derivative::Derivative;
 use ges::Layer;
@@ -16,6 +17,7 @@ use std::io::Read;
 use crate::core::cursor::CursorEntry;
 use crate::core::cursor::CursorFile;
 use crate::core::rdp;
+use crate::core::utils;
 
 pub const ZOOM_ANIMATION_NSEC: u64 = 1_000_000_000;
 pub const RESIZE_HANDLE_SIZE: f64 = 10.0;
@@ -198,6 +200,7 @@ impl Video {
         video_track.set_restriction_caps(&caps);
 
         let video_layer = timeline.append_layer();
+        video_layer.set_priority(100);
         let video_clip = video_layer
             .add_asset(
                 &video_asset,
@@ -245,9 +248,10 @@ impl Video {
     }
 
     pub fn setup_cursor(&mut self) -> Result<()> {
-        let curs_path = self.recording_file.with_extension("curs");
+        let real_path = utils::resolve_portal_path(&self.recording_file);
+        let curs_path = real_path.with_extension("curs");
         let curs_path_str = curs_path.to_str().unwrap();
-        if !self.recording_file.with_extension("curs").exists() {
+        if !curs_path.exists() {
             self.set_cursor_enabled(false)?;
             bail!(
                 "curs file not found at {}, cursor features are disabled",
