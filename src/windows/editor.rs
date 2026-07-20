@@ -43,7 +43,7 @@ mod imp {
         #[template_child]
         pub timeline_widget: TemplateChild<timeline::Timeline>,
         #[template_child]
-        pub cursor_smoothing_spin: TemplateChild<adw::SpinRow>,
+        pub cursor_smoothing_scale: TemplateChild<gtk::Scale>,
         #[template_child]
         pub cursor_show: TemplateChild<adw::SwitchRow>,
         #[template_child]
@@ -156,7 +156,7 @@ mod imp {
         }
 
         #[template_callback]
-        fn handle_cursor_smoothing_changed(&self, scale: &adw::SpinRow) {
+        fn handle_cursor_smoothing_changed(&self, scale: &gtk::Scale) {
             if !self.is_setup() {
                 return;
             }
@@ -267,7 +267,7 @@ mod imp {
                     // TODO: message on top of cursor page to explain its disabled because of
                     // missing curs file
                     this.imp().cursor_show.set_sensitive(enabled);
-                    this.imp().cursor_smoothing_spin.set_sensitive(enabled);
+                    this.imp().cursor_smoothing_scale.set_sensitive(enabled);
                     this.imp().cursor_size_spin.set_sensitive(enabled);
                 }),
             )?;
@@ -282,7 +282,7 @@ mod imp {
 
         fn set_initial_values(&self) {
             let video = self.video();
-            self.cursor_smoothing_spin
+            self.cursor_smoothing_scale
                 .set_value(video.cursor_smoothing());
             self.cursor_show.set_active(video.cursor_show());
         }

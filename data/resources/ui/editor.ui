@@ -34,62 +34,80 @@
                 <child>
                   <object class="GtkStackSwitcher">
                     <property name="halign">center</property>
-                    <property name="margin-bottom">12</property>
+                    <property name="margin-bottom">24</property>
                     <property name="stack">stack</property>
                   </object>
                 </child>
                 <child>
                   <object class="GtkStack" id="stack">
                     <child>
-                      <object class="GtkStackPage">
+                      <object class="GtkStackPage" id="cursor_page">
                         <property name="child">
-                          <object class="GtkBox">
-                            <property name="orientation">vertical</property>
+                          <object class="AdwClamp">
+                            <property name="maximum-size">500</property>
                             <child>
-                              <object class="AdwSwitchRow" id="cursor_show">
-                                <property name="active">True</property>
-                                <property name="title" translatable="yes">Show cursor</property>
-                                <signal name="notify::active" handler="handle_cursor_switch" swapped="True"/>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="AdwSpinRow" id="cursor_smoothing_spin">
-                                <property name="adjustment">
-                                  <object class="GtkAdjustment">
-                                    <property name="lower">0</property>
-                                    <property name="page-increment">100</property>
-                                    <property name="step-increment">10</property>
-                                    <property name="upper">100</property>
-                                    <property name="value">0</property>
+                              <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkListBox">
+                                    <property name="selection-mode">none</property>
+                                    <child>
+                                      <object class="AdwSwitchRow" id="cursor_show">
+                                        <property name="active">True</property>
+                                        <property name="title" translatable="yes">Show cursor</property>
+                                        <signal name="notify::active" handler="handle_cursor_switch" swapped="True"/>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwActionRow">
+                                        <property name="activatable">True</property>
+                                        <property name="title">Smoothing</property>
+                                        <child>
+                                          <object class="GtkScale" id="cursor_smoothing_scale">
+                                            <property name="adjustment">
+                                              <object class="GtkAdjustment">
+                                                <property name="lower">0</property>
+                                                <property name="page-increment">100</property>
+                                                <property name="step-increment">10</property>
+                                                <property name="upper">100</property>
+                                                <property name="value">0</property>
+                                              </object>
+                                            </property>
+                                            <property name="digits">0</property>
+                                            <property name="draw-value">True</property>
+                                            <property name="hexpand">True</property>
+                                            <property name="value-pos">right</property>
+                                            <signal name="value-changed" handler="handle_cursor_smoothing_changed" swapped="True"/>
+                                          </object>
+                                        </child>
+                                      </object>
+                                    </child>
+                                    <child>
+                                      <object class="AdwSpinRow" id="cursor_size_spin">
+                                        <property name="adjustment">
+                                          <object class="GtkAdjustment">
+                                            <property name="lower">1.0</property>
+                                            <property name="page-increment">10.0</property>
+                                            <property name="step-increment">1.0</property>
+                                            <property name="upper">10.0</property>
+                                            <property name="value">3.0</property>
+                                          </object>
+                                        </property>
+                                        <property name="can-focus">False</property>
+                                        <property name="climb-rate">1.0</property>
+                                        <property name="editable">False</property>
+                                        <property name="enable-undo">False</property>
+                                        <property name="focus-on-click">False</property>
+                                        <property name="focusable">False</property>
+                                        <property name="title">Cursor size</property>
+                                        <signal name="changed" handler="handle_cursor_size_changed" swapped="True"/>
+                                      </object>
+                                    </child>
+                                    <style>
+                                      <class name="boxed-list"/>
+                                    </style>
                                   </object>
-                                </property>
-                                <property name="can-focus">False</property>
-                                <property name="climb-rate">1.0</property>
-                                <property name="enable-undo">False</property>
-                                <property name="focus-on-click">False</property>
-                                <property name="focusable">False</property>
-                                <property name="title">Smoothing</property>
-                                <signal name="changed" handler="handle_cursor_smoothing_changed" swapped="True"/>
-                              </object>
-                            </child>
-                            <child>
-                              <object class="AdwSpinRow" id="cursor_size_spin">
-                                <property name="adjustment">
-                                  <object class="GtkAdjustment">
-                                    <property name="lower">1.0</property>
-                                    <property name="page-increment">10.0</property>
-                                    <property name="step-increment">1.0</property>
-                                    <property name="upper">10.0</property>
-                                    <property name="value">3.0</property>
-                                  </object>
-                                </property>
-                                <property name="can-focus">False</property>
-                                <property name="climb-rate">1.0</property>
-                                <property name="enable-undo">False</property>
-                                <property name="focus-on-click">False</property>
-                                <property name="focusable">False</property>
-                                <property name="title">Cursor size</property>
-                                <signal name="changed" handler="handle_cursor_size_changed" swapped="True"/>
+                                </child>
                               </object>
                             </child>
                           </object>
@@ -98,7 +116,7 @@
                       </object>
                     </child>
                     <child>
-                      <object class="GtkStackPage">
+                      <object class="GtkStackPage" id="background_page">
                         <property name="child">
                           <object class="GtkLabel">
                             <property name="label" translatable="yes">Empty Page</property>

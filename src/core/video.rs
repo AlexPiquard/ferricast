@@ -5,7 +5,6 @@ use std::path::PathBuf;
 use std::rc::Rc;
 
 use anyhow::Result;
-use anyhow::anyhow;
 use anyhow::bail;
 use derivative::Derivative;
 use ges::Layer;
