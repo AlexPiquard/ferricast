@@ -22,7 +22,7 @@ pub struct DragState {
 }
 
 mod imp {
-    use std::cell::{OnceCell, Ref, RefMut};
+    use std::cell::{Cell, OnceCell, Ref, RefMut};
 
     use gtk::gdk::Cursor;
 
@@ -301,7 +301,7 @@ mod imp {
                         state.original_start_nsec,
                         state.original_end_nsec,
                     ) {
-                        tracing::error!("failed to apply zoom effect changes: {:?}", e);
+                        tracing::error!("failed to update zoom range: {:?}", e);
                     }
                 }
 
@@ -332,7 +332,7 @@ mod imp {
                             if let Err(e) =
                                 video.update_zoom_geometry(effect_id, factor, pos_x, pos_y)
                             {
-                                tracing::error!("failed to apply zoom effect changes: {:?}", e);
+                                tracing::error!("failed to update zoom geometry: {:?}", e);
                             }
                         },
                         move || {
@@ -390,6 +390,8 @@ mod imp {
 
             // TODO: define animation duration (individualy)
 
+            let deleted = Rc::new(Cell::new(false));
+
             popover.connect_closed(glib::clone!(
                 #[weak]
                 factor_row,
@@ -397,10 +399,20 @@ mod imp {
                 pos_x_row,
                 #[weak]
                 pos_y_row,
+                #[strong]
+                effect,
+                #[strong]
+                deleted,
                 move |_| {
+                    if deleted.get() {
+                        return;
+                    }
                     let factor = factor_row.value();
                     let pos_x = pos_x_row.value();
                     let pos_y = pos_y_row.value();
+                    if factor == effect.factor && pos_x == effect.pos_x && pos_y == effect.pos_y {
+                        return;
+                    }
                     on_edit(factor, pos_x, pos_y);
                 }
             ));
@@ -416,7 +428,10 @@ mod imp {
             delete.connect_clicked(glib::clone!(
                 #[weak]
                 popover,
+                #[strong]
+                deleted,
                 move |_| {
+                    deleted.set(true);
                     on_delete();
                     popover.popdown();
                 }
