@@ -43,6 +43,8 @@ mod imp {
         #[template_child]
         pub timeline_widget: TemplateChild<timeline::Timeline>,
         #[template_child]
+        pub cursor_page_banner: TemplateChild<adw::Banner>,
+        #[template_child]
         pub cursor_smoothing_scale: TemplateChild<gtk::Scale>,
         #[template_child]
         pub cursor_show: TemplateChild<adw::SwitchRow>,
@@ -260,15 +262,28 @@ mod imp {
             let paintable = sink.property::<gtk::gdk::Paintable>("paintable");
 
             let this = self.obj().clone();
-            // TODO: update timecode_button label
             let video = Video::try_new(
                 recording_file,
                 Some(move |enabled| {
-                    // TODO: message on top of cursor page to explain its disabled because of
-                    // missing curs file
                     this.imp().cursor_show.set_sensitive(enabled);
                     this.imp().cursor_smoothing_scale.set_sensitive(enabled);
                     this.imp().cursor_size_spin.set_sensitive(enabled);
+
+                    if let Some(row) = this
+                        .imp()
+                        .cursor_smoothing_scale
+                        .ancestor(adw::ActionRow::static_type())
+                        .and_downcast::<adw::ActionRow>()
+                    {
+                        row.set_sensitive(enabled);
+                    }
+
+                    this.imp().cursor_page_banner.set_revealed(!enabled);
+                    if !enabled {
+                        this.imp()
+                            .cursor_page_banner
+                            .set_title("Cursor file not found, related features are disabled");
+                    }
                 }),
             )?;
             video.set_video_sink(&bin);
