@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: ferricast\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-06-05 17:06+0200\n"
+"POT-Creation-Date: 2026-07-23 12:03+0200\n"
 "PO-Revision-Date: 2026-06-05 10:51+0200\n"
 "Last-Translator: AlexPiquard <alex.piquard@hotmail.com>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -52,97 +52,73 @@ msgstr ""
 "Effets de mouvement et déplacements de souris automatiques à partir des "
 "captures."
 
-#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:16
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:15
 msgid "Editor window"
 msgstr "Fenêtre de l'éditeur"
 
-#: data/resources/ui/shortcuts.ui:11
-msgctxt "shortcut window"
-msgid "General"
-msgstr "Général"
-
-#: data/resources/ui/shortcuts.ui:14
-msgctxt "shortcut window"
-msgid "Show Shortcuts"
-msgstr "Afficher les raccourcis"
-
-#: data/resources/ui/shortcuts.ui:20
-msgctxt "shortcut window"
-msgid "Close Window"
-msgstr "Fermer la fenêtre"
-
-#: data/resources/ui/shortcuts.ui:26
-msgctxt "shortcut window"
-msgid "Quit"
-msgstr "Quitter"
-
-#: data/resources/ui/window.ui:10 data/resources/ui/editor.ui:9
+#: data/resources/ui/editor.ui:10 data/resources/ui/window.ui:10
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: data/resources/ui/window.ui:14 data/resources/ui/editor.ui:13
+#: data/resources/ui/editor.ui:14 data/resources/ui/window.ui:14
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
-#: data/resources/ui/window.ui:18 data/resources/ui/editor.ui:17
+#: data/resources/ui/editor.ui:18 data/resources/ui/window.ui:18
 msgid "_About Ferricast"
 msgstr "_À propos de Ferricast"
 
-#: data/resources/ui/window.ui:43
-msgid "Start recording"
-msgstr "Démarrer l'enregistrement"
-
-#: data/resources/ui/window.ui:56
-msgid "Open existing recording"
-msgstr "Ouvrir un enregistrement existant"
-
-#: data/resources/ui/window.ui:69 data/resources/ui/editor.ui:202
-msgid "Main Menu"
-msgstr "Menu principal"
-
-#: data/resources/ui/editor.ui:24
-msgid "Ferricast Editor"
-msgstr "Éditeur Ferricast"
-
-#: data/resources/ui/editor.ui:54
+#: data/resources/ui/editor.ui:65
 msgid "Show cursor"
 msgstr "Afficher le curseur"
 
-#: data/resources/ui/editor.ui:60
+#: data/resources/ui/editor.ui:72
 msgid "Smoothing"
 msgstr "Lissage"
 
-#: data/resources/ui/editor.ui:85
+#: data/resources/ui/editor.ui:110
+msgid "Cursor size"
+msgstr "Taille du curseur"
+
+#: data/resources/ui/editor.ui:123
 msgid "Cursor"
 msgstr "Curseur"
 
-#: data/resources/ui/editor.ui:92
+#: data/resources/ui/editor.ui:130
 msgid "Empty Page"
 msgstr "Page vide"
 
-#: data/resources/ui/editor.ui:95
+#: data/resources/ui/editor.ui:133
 msgid "Background"
 msgstr "Arrière-plan"
 
-#: data/resources/ui/editor.ui:134
+#: data/resources/ui/editor.ui:172
 msgid "Zoom"
 msgstr "Zoom"
 
-#: data/resources/ui/editor.ui:145
+#: data/resources/ui/editor.ui:183
 msgid "Trim"
 msgstr "Rogner"
 
-#: data/resources/ui/editor.ui:156
+#: data/resources/ui/editor.ui:194
 msgid "Speed"
 msgstr "Vitesse"
 
-#: data/resources/ui/editor.ui:214 data/resources/ui/render.ui:132
+#: data/resources/ui/editor.ui:252 data/resources/ui/window.ui:68
+msgid "Main Menu"
+msgstr "Menu principal"
+
+#: data/resources/ui/editor.ui:262 data/resources/ui/render.ui:132
 msgid "Render"
 msgstr "Exporter"
 
-#: data/resources/ui/editor.ui:215 data/resources/ui/render.ui:106
+#: data/resources/ui/editor.ui:263 data/resources/ui/render.ui:106
 msgid "Render video"
 msgstr "Créer la vidéo"
+
+#: data/resources/ui/editor.ui:277
+msgid "Ferricast Editor"
+msgstr "Éditeur Ferricast"
 
 #: data/resources/ui/render.ui:35
 msgid "Change the format of the produced video"
@@ -192,26 +168,66 @@ msgstr "Lire"
 msgid "Play the created video"
 msgstr "Lire la vidéo créée"
 
+#: data/resources/ui/shortcuts.ui:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "Général"
+
+#: data/resources/ui/shortcuts.ui:14
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Afficher les raccourcis"
+
+#: data/resources/ui/shortcuts.ui:20
+msgctxt "shortcut window"
+msgid "Close Window"
+msgstr "Fermer la fenêtre"
+
+#: data/resources/ui/shortcuts.ui:26
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Quitter"
+
+#: data/resources/ui/window.ui:40
+msgid "Start recording"
+msgstr "Démarrer l'enregistrement"
+
+#: data/resources/ui/window.ui:53
+msgid "Open existing recording"
+msgstr "Ouvrir un enregistrement existant"
+
 #: src/application.rs:125
 msgid "translator-credits"
 msgstr "Alex Piquard"
 
-#: src/widgets/timeline.rs:376
+#: src/widgets/timeline.rs:381
 msgid "Factor"
 msgstr "Facteur"
 
-#: src/widgets/timeline.rs:381
-msgid "Horizontal pos"
+#: src/widgets/timeline.rs:386
+msgid "Horizontal pos."
 msgstr "Pos. horizontale"
 
-#: src/widgets/timeline.rs:386
-msgid "Vertical pos"
+#: src/widgets/timeline.rs:391
+msgid "Vertical pos."
 msgstr "Pos. verticale"
 
-#: src/widgets/timeline.rs:410
+#: src/widgets/timeline.rs:402
+msgid "Start anim. duration"
+msgstr "Durée d'anim. de début"
+
+#: src/widgets/timeline.rs:411
+msgid "End anim. duration"
+msgstr "Durée d'anim. de fin"
+
+#: src/widgets/timeline.rs:456
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/windows/editor.rs:176
+#: src/windows/editor.rs:189
 msgid "Failed to open recording"
 msgstr "Echec d'ouverture de la vidéo"
+
+#: src/windows/editor.rs:282
+msgid "Cursor file not found, related features are disabled"
+msgstr "Fichier de curseur introuvable, les fonctionnalités associées sont desactivées"

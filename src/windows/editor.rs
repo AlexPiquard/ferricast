@@ -277,9 +277,9 @@ mod imp {
 
                     this.imp().cursor_page_banner.set_revealed(!enabled);
                     if !enabled {
-                        this.imp()
-                            .cursor_page_banner
-                            .set_title("Cursor file not found, related features are disabled");
+                        this.imp().cursor_page_banner.set_title(&gettext(
+                            "Cursor file not found, related features are disabled",
+                        ));
                     }
                 }),
             )?;

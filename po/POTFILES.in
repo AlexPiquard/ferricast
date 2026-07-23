@@ -1,12 +1,13 @@
 data/fr.alexpiquard.ferricast.desktop.in.in
 data/fr.alexpiquard.ferricast.gschema.xml.in
 data/fr.alexpiquard.ferricast.metainfo.xml.in.in
-data/resources/ui/shortcuts.ui
-data/resources/ui/window.ui
 data/resources/ui/editor.ui
 data/resources/ui/render.ui
+data/resources/ui/shortcuts.ui
+data/resources/ui/window.ui
 src/application.rs
 src/config.rs
+src/core/cursor.rs
 src/core/mod.rs
 src/core/rdp.rs
 src/core/render/formats.rs
@@ -18,6 +19,7 @@ src/core/utils.rs
 src/core/video.rs
 src/main.rs
 src/widgets/mod.rs
+src/widgets/timecode.rs
 src/widgets/timeline.rs
 src/windows/editor.rs
 src/windows/main.rs
