@@ -127,7 +127,6 @@ mod imp {
                 button.set_icon_name(icon);
             }
         }
-        // TODO: buttons to go before and after : +/- 10% of duration ?
 
         #[template_callback]
         fn handle_render_clicked(&self) {
@@ -144,11 +143,9 @@ mod imp {
             };
 
             if let Err(err) = self.video_mut().add_zoom(ZoomEffect {
-                factor: 1.5,
                 start_nsec: current_pos,
                 end_nsec: current_pos + 2_000_000_000,
-                pos_x: 0.5,
-                pos_y: 0.5,
+                ..ZoomEffect::default()
             }) {
                 tracing::error!("failed to add zoom: {:#?}", err);
                 return;

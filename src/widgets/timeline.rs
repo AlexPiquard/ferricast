@@ -1,6 +1,5 @@
 use crate::core::video::ResizeHandle;
 use crate::core::video::Video;
-use crate::core::video::ZOOM_ANIMATION_NSEC;
 use adw::prelude::PreferencesRowExt;
 use ges::prelude::*;
 use gettextrs::gettext;
@@ -26,7 +25,7 @@ mod imp {
 
     use gtk::gdk::Cursor;
 
-    use crate::core::video::ZoomEffect;
+    use crate::core::video::{self, ZoomEffect};
 
     use super::*;
 
@@ -261,10 +260,10 @@ mod imp {
                 match state.handle {
                     ResizeHandle::Left => {
                         let new_start = (state.original_start_nsec as i64 + delta_nsec) as u64;
-                        if new_start < effect.end_nsec && new_start > ZOOM_ANIMATION_NSEC {
+                        if new_start < effect.end_nsec && new_start > effect.start_anim_dur_nsec {
                             effect.start_nsec = new_start;
                         } else if new_start < effect.end_nsec {
-                            effect.start_nsec = ZOOM_ANIMATION_NSEC;
+                            effect.start_nsec = effect.start_anim_dur_nsec;
                         } else {
                             effect.start_nsec = effect.end_nsec;
                         }
@@ -276,11 +275,11 @@ mod imp {
                         }
                         let new_end = (state.original_end_nsec as i64 + delta_nsec) as u64;
                         if new_end > effect.start_nsec
-                            && new_end < video_duration - ZOOM_ANIMATION_NSEC
+                            && new_end < video_duration - effect.end_anim_dur_nsec
                         {
                             effect.end_nsec = new_end;
                         } else if new_end > effect.start_nsec {
-                            effect.end_nsec = video_duration - ZOOM_ANIMATION_NSEC;
+                            effect.end_nsec = video_duration - effect.end_anim_dur_nsec;
                         } else {
                             effect.end_nsec = effect.start_nsec;
                         }
@@ -327,11 +326,17 @@ mod imp {
                         effect,
                         x,
                         y,
-                        move |factor, pos_x, pos_y| {
+                        move |factor, pos_x, pos_y, start_anim, end_anim, anim_changed| {
                             let mut video = this_edit.imp().video_mut();
-                            if let Err(e) =
-                                video.update_zoom_geometry(effect_id, factor, pos_x, pos_y)
-                            {
+                            if let Err(e) = video.update_zoom_geometry(
+                                effect_id,
+                                factor,
+                                pos_x,
+                                pos_y,
+                                start_anim,
+                                end_anim,
+                                anim_changed,
+                            ) {
                                 tracing::error!("failed to update zoom geometry: {:?}", e);
                             }
                         },
@@ -356,7 +361,7 @@ mod imp {
             on_edit: E,
             on_delete: D,
         ) where
-            E: Fn(f64, f64, f64) + 'static,
+            E: Fn(f64, f64, f64, u64, u64, bool) + 'static,
             D: Fn() + 'static,
         {
             let popover = gtk::Popover::new();
@@ -378,17 +383,34 @@ mod imp {
             list_box.append(&factor_row);
 
             let pos_x_row = adw::SpinRow::with_range(0.0, 1.0, 0.05);
-            pos_x_row.set_title(&gettext("Horizontal pos"));
+            pos_x_row.set_title(&gettext("Horizontal pos."));
             pos_x_row.set_value(effect.pos_x);
             list_box.append(&pos_x_row);
 
             let pos_y_row = adw::SpinRow::with_range(0.0, 1.0, 0.05);
-            pos_y_row.set_title(&gettext("Vertical pos"));
-
+            pos_y_row.set_title(&gettext("Vertical pos."));
             pos_y_row.set_value(effect.pos_y);
             list_box.append(&pos_y_row);
 
-            // TODO: define animation duration (individualy)
+            let max_start_anim_dur =
+                (effect.start_nsec as f64 / 1_000_000_000.0).min(video::MAX_ZOOM_ANIMATION_DUR_SEC);
+            let start_anim_row = adw::SpinRow::with_range(
+                video::MIN_ZOOM_ANIMATION_DUR_SEC,
+                max_start_anim_dur,
+                0.1,
+            );
+            start_anim_row.set_title(&gettext("Start anim. duration"));
+            start_anim_row.set_value(effect.start_anim_dur_nsec as f64 / 1_000_000_000.0);
+            list_box.append(&start_anim_row);
+
+            let max_end_anim_dur = ((self.video().duration_nsec() - effect.end_nsec) as f64
+                / 1_000_000_000.0)
+                .min(video::MAX_ZOOM_ANIMATION_DUR_SEC);
+            let end_anim_row =
+                adw::SpinRow::with_range(video::MIN_ZOOM_ANIMATION_DUR_SEC, max_end_anim_dur, 0.1);
+            end_anim_row.set_title(&gettext("End anim. duration"));
+            end_anim_row.set_value(effect.end_anim_dur_nsec as f64 / 1_000_000_000.0);
+            list_box.append(&end_anim_row);
 
             let deleted = Rc::new(Cell::new(false));
 
@@ -399,6 +421,10 @@ mod imp {
                 pos_x_row,
                 #[weak]
                 pos_y_row,
+                #[weak]
+                start_anim_row,
+                #[weak]
+                end_anim_row,
                 #[strong]
                 effect,
                 #[strong]
@@ -410,10 +436,18 @@ mod imp {
                     let factor = factor_row.value();
                     let pos_x = pos_x_row.value();
                     let pos_y = pos_y_row.value();
-                    if factor == effect.factor && pos_x == effect.pos_x && pos_y == effect.pos_y {
+                    let start_anim = (start_anim_row.value() * 1_000_000_000.0) as u64;
+                    let end_anim = (end_anim_row.value() * 1_000_000_000.0) as u64;
+                    let anim_changed = start_anim != effect.start_anim_dur_nsec
+                        || end_anim != effect.end_anim_dur_nsec;
+                    if factor == effect.factor
+                        && pos_x == effect.pos_x
+                        && pos_y == effect.pos_y
+                        && !anim_changed
+                    {
                         return;
                     }
-                    on_edit(factor, pos_x, pos_y);
+                    on_edit(factor, pos_x, pos_y, start_anim, end_anim, anim_changed);
                 }
             ));
 

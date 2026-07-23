@@ -18,14 +18,18 @@ use crate::core::cursor::CursorFile;
 use crate::core::rdp;
 use crate::core::utils;
 
-pub const ZOOM_ANIMATION_NSEC: u64 = 1_000_000_000;
 pub const RESIZE_HANDLE_SIZE: f64 = 10.0;
+const DEFAULT_ZOOM_ANIMATION_NSEC: u64 = 1_000_000_000;
+pub const MAX_ZOOM_ANIMATION_DUR_SEC: f64 = 2.0;
+pub const MIN_ZOOM_ANIMATION_DUR_SEC: f64 = 0.1;
 
 #[derive(Debug, Clone)]
 pub struct ZoomEffect {
     pub factor: f64,
     pub start_nsec: u64,
     pub end_nsec: u64,
+    pub start_anim_dur_nsec: u64,
+    pub end_anim_dur_nsec: u64,
     pub pos_x: f64,
     pub pos_y: f64,
 }
@@ -35,6 +39,20 @@ pub enum ResizeHandle {
     Left,
     Right,
     None,
+}
+
+impl Default for ZoomEffect {
+    fn default() -> Self {
+        Self {
+            factor: 1.5,
+            start_nsec: 0,
+            end_nsec: 2_000_000_000,
+            start_anim_dur_nsec: DEFAULT_ZOOM_ANIMATION_NSEC,
+            end_anim_dur_nsec: DEFAULT_ZOOM_ANIMATION_NSEC,
+            pos_x: 0.5,
+            pos_y: 0.5,
+        }
+    }
 }
 
 impl ZoomEffect {
@@ -68,18 +86,18 @@ impl ZoomEffect {
     }
 
     pub fn start_anim_nsec(&self) -> u64 {
-        if self.start_nsec <= ZOOM_ANIMATION_NSEC {
+        if self.start_nsec <= self.start_anim_dur_nsec {
             return 0;
         }
-        self.start_nsec - ZOOM_ANIMATION_NSEC
+        self.start_nsec - self.start_anim_dur_nsec
     }
 
     pub fn end_anim_nsec(&self, video_duration_nsec: u64) -> u64 {
-        if self.end_nsec + ZOOM_ANIMATION_NSEC > video_duration_nsec {
+        if self.end_nsec + self.end_anim_dur_nsec > video_duration_nsec {
             return video_duration_nsec;
         }
 
-        self.end_nsec + ZOOM_ANIMATION_NSEC
+        self.end_nsec + self.end_anim_dur_nsec
     }
 
     pub fn clocktimes(
@@ -368,6 +386,7 @@ impl Video {
         Ok(())
     }
 
+    // FIX: no visible window at right bar of gnome after opening editor window
     fn setup_cursor_entries(&mut self, cursor_type_entries: Vec<usize>) -> anyhow::Result<()> {
         if !self.cursor_enabled {
             return Ok(());
@@ -648,19 +667,31 @@ impl Video {
         factor: f64,
         pos_x: f64,
         pos_y: f64,
+        start_anim: u64,
+        end_anim: u64,
+        anim_changed: bool,
     ) -> Result<()> {
-        {
-            let Some(zoom) = self.zoom_effect_mut(zoom_id) else {
+        if anim_changed {
+            let Some(zoom) = self.zoom_effect(zoom_id) else {
                 bail!("cant find zoom with id {}", zoom_id)
             };
+            self.unshow_zoom(zoom)?;
+        }
+
+        {
+            let zoom = self.zoom_effect_mut(zoom_id).unwrap();
             zoom.factor = factor;
             zoom.pos_x = pos_x;
             zoom.pos_y = pos_y;
+            zoom.start_anim_dur_nsec = start_anim;
+            zoom.end_anim_dur_nsec = end_anim;
         }
+
         if let Some(zoom) = self.zoom_effect(zoom_id) {
             self.show_zoom(zoom)?;
             self.redraw_cursor();
-        };
+        }
+
         Ok(())
     }
 
