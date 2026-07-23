@@ -43,16 +43,17 @@
                     <child>
                       <object class="GtkStackPage" id="cursor_page">
                         <property name="child">
-                          <object class="AdwClamp">
-                            <property name="maximum-size">500</property>
+                          <object class="GtkBox">
+                            <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkBox">
-                                <property name="orientation">vertical</property>
-                                <child>
-                                  <object class="AdwBanner" id="cursor_page_banner">
-                                    <property name="margin-bottom">12</property>
-                                  </object>
-                                </child>
+                              <object class="AdwBanner" id="cursor_page_banner">
+                                <property name="margin-bottom">12</property>
+                                <property name="title" translatable="yes"></property>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="AdwClamp">
+                                <property name="maximum-size">500</property>
                                 <child>
                                   <object class="GtkListBox">
                                     <property name="margin-end">12</property>
@@ -68,7 +69,7 @@
                                     <child>
                                       <object class="AdwActionRow">
                                         <property name="activatable">True</property>
-                                        <property name="title">Smoothing</property>
+                                        <property name="title" translatable="yes">Smoothing</property>
                                         <child>
                                           <object class="GtkScale" id="cursor_smoothing_scale">
                                             <property name="adjustment">
@@ -106,7 +107,7 @@
                                         <property name="enable-undo">False</property>
                                         <property name="focus-on-click">False</property>
                                         <property name="focusable">False</property>
-                                        <property name="title">Cursor size</property>
+                                        <property name="title" translatable="yes">Cursor size</property>
                                         <signal name="changed" handler="handle_cursor_size_changed" swapped="True"/>
                                       </object>
                                     </child>
