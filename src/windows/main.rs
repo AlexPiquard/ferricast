@@ -9,7 +9,12 @@ mod imp {
 
     use adw::subclass::prelude::AdwApplicationWindowImpl;
 
-    use crate::{config::PROFILE, core::screencast, runtime, windows};
+    use crate::{
+        config::PROFILE,
+        core::screencast,
+        runtime,
+        windows::{self, shortcuts},
+    };
 
     use super::*;
 
@@ -43,6 +48,8 @@ mod imp {
             if *PROFILE == "Devel" {
                 self.obj().add_css_class("devel");
             }
+
+            shortcuts::setup_shortcuts(self.obj().upcast_ref::<adw::ApplicationWindow>());
         }
     }
 

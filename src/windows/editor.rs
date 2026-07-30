@@ -15,6 +15,7 @@ mod imp {
     use crate::widgets::timecode;
     use crate::widgets::timeline;
     use crate::windows;
+    use crate::windows::shortcuts;
     use adw::prelude::*;
     use adw::subclass::prelude::*;
     use anyhow::Result;
@@ -86,6 +87,8 @@ mod imp {
             if *PROFILE == "Devel" {
                 self.obj().add_css_class("devel");
             }
+
+            shortcuts::setup_shortcuts(self.obj().upcast_ref::<adw::ApplicationWindow>());
 
             self.settings
                 .set(gio::Settings::new(*APP_ID))

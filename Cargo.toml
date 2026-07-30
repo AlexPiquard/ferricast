@@ -8,7 +8,7 @@ lto = true
 
 [dependencies]
 gettext-rs = { version = "0.7", features = ["gettext-system"] }
-gtk = { version = "0.11", package = "gtk4", features = ["v4_10"] }
+gtk = { version = "0.11", package = "gtk4", features = ["v4_10", "blueprint"] }
 pipewire = { version = "0.9", features = ["v0_3_32"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
 anyhow = "1"

@@ -1,0 +1,172 @@
+using Gtk 4.0;
+using Adw 1;
+
+template $RenderWindow : Adw.Window {
+  default-height: 400;
+  default-width: 640;
+  modal: true;
+
+  Adw.ToolbarView {
+    content: Adw.Bin {
+      halign: center;
+      margin-top: 32;
+      valign: start;
+
+      Gtk.Stack content_stack {
+        Gtk.StackPage {
+          name: "settings";
+
+          child: Gtk.ListBox {
+            selection-mode: none;
+            width-request: 400;
+
+            styles [
+              "boxed-list",
+            ]
+
+            Adw.ComboRow format_input {
+              enable-search: false;
+              subtitle: _("Change the format of the produced video");
+              title: _("Video format");
+
+              model: Gtk.StringList formats_list {
+                strings: [];
+              };
+            }
+
+            Adw.SpinRow start_time_input {
+              digits: 2;
+              numeric: true;
+              subtitle: _("Set the exact timestamp in seconds where the video should begin");
+              title: _("Start position (sec)");
+
+              adjustment: Gtk.Adjustment {
+                lower: 0.0;
+                upper: 10.0;
+                value: 0.0;
+                step-increment: 0.1;
+                page-increment: 1;
+              };
+            }
+
+            Adw.SpinRow end_time_input {
+              digits: 2;
+              numeric: true;
+              subtitle: _("Set the exact timestamp in seconds where the video should end");
+              title: _("End position (sec)");
+
+              adjustment: Gtk.Adjustment {
+                lower: -1;
+                upper: 9999;
+                value: -1;
+                step-increment: 0.1;
+                page-increment: 1;
+              };
+            }
+          };
+        }
+
+        Gtk.StackPage {
+          name: "render";
+
+          child: Adw.Bin {
+            hexpand: true;
+            valign: center;
+            vexpand: true;
+
+            Gtk.ProgressBar progress_bar {
+              hexpand: true;
+              show-text: true;
+            }
+          };
+        }
+      }
+    };
+
+    [top]
+    Adw.HeaderBar {
+      title-widget: Adw.WindowTitle {
+        title: _("Render video");
+      };
+    }
+
+    [bottom]
+    Gtk.Stack action_bar_stack {
+      Gtk.StackPage {
+        name: "settings";
+
+        child: Gtk.ActionBar {
+          revealed: true;
+          valign: end;
+
+          [start]
+          Gtk.Button {
+            label: _("Cancel");
+            clicked => $handle_settings_cancel_clicked() swapped;
+          }
+
+          [end]
+          Gtk.Button {
+            styles [
+              "suggested-action",
+            ]
+            tooltip-text: _("Render video with defined settings");
+            clicked => $handle_render_clicked() swapped;
+
+            Adw.ButtonContent {
+              icon-name: "camera-web-symbolic";
+              label: _("Render");
+            }
+          }
+        };
+      }
+
+      Gtk.StackPage {
+        name: "render";
+
+        child: Gtk.ActionBar {
+          revealed: true;
+          valign: end;
+
+          [start]
+          Gtk.Button {
+            label: _("Cancel");
+            clicked => $handle_render_cancel_clicked() swapped;
+          }
+
+          [end]
+          Gtk.Box render_action_bar_end_box {
+            spacing: 12;
+            visible: false;
+
+            Gtk.Button {
+              styles [
+                "raised",
+              ]
+              tooltip-text: _("Open the folder of the created video");
+              clicked => $handle_open_clicked() swapped;
+
+              Adw.ButtonContent {
+                icon-name: "folder-symbolic";
+                label: _("Open Folder");
+              }
+            }
+
+            Gtk.Button {
+              styles [
+                "suggested-action",
+              ]
+              tooltip-text: _("Play the created video");
+              clicked => $handle_play_clicked() swapped;
+
+              Adw.ButtonContent {
+                icon-name: "video-display-symbolic";
+                label: _("Play");
+              }
+            }
+          }
+        };
+      }
+    }
+  }
+}

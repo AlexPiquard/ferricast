@@ -1,0 +1,256 @@
+using Gtk 4.0;
+using Adw 1;
+
+menu primary_menu {
+  section {
+    item {
+      action: "app.preferences";
+      label: _("_Preferences");
+    }
+
+    item {
+      action: "win.show-help-overlay";
+      label: _("_Keyboard Shortcuts");
+    }
+
+    item {
+      action: "app.about";
+      label: _("_About Ferricast");
+    }
+  }
+}
+
+template $EditorWindow: Adw.ApplicationWindow {
+  default-height: 800;
+  default-width: 1200;
+  title: _("Ferricast Editor");
+
+  content: Adw.ToolbarView {
+    top-bar-style: raised;
+
+    content: Paned {
+      shrink-end-child: false;
+      shrink-start-child: false;
+
+      end-child: Box {
+        margin-bottom: 12;
+        margin-top: 12;
+        orientation: vertical;
+
+        StackSwitcher {
+          halign: center;
+          margin-bottom: 24;
+          margin-end: 12;
+          margin-start: 12;
+          stack: stack;
+        }
+
+        Stack stack {
+          StackPage cursor_page {
+            title: _("Cursor");
+
+            child: Box {
+              orientation: vertical;
+
+              Adw.Banner cursor_page_banner {
+                margin-bottom: 12;
+                title: _("");
+              }
+
+              Adw.Clamp {
+                maximum-size: 500;
+
+                child: ListBox {
+                  margin-end: 12;
+                  margin-start: 12;
+                  selection-mode: none;
+
+                  styles [
+                    "boxed-list",
+                  ]
+
+                  Adw.SwitchRow cursor_show {
+                    active: true;
+                    title: _("Show cursor");
+                    notify::active => $handle_cursor_switch() swapped;
+                  }
+
+                  Adw.ActionRow {
+                    activatable: true;
+                    title: _("Smoothing");
+
+                    [suffix]
+                    Scale cursor_smoothing_scale {
+                      digits: 0;
+                      draw-value: true;
+                      hexpand: true;
+                      value-pos: right;
+
+                      adjustment: Adjustment {
+                        lower: 0;
+                        upper: 100;
+                        value: 0;
+                        page-increment: 100;
+                        step-increment: 10;
+                      };
+
+                      value-changed => $handle_cursor_smoothing_changed() swapped;
+                    }
+                  }
+
+                  Adw.SpinRow cursor_size_spin {
+                    can-focus: false;
+                    climb-rate: 1;
+                    editable: false;
+                    enable-undo: false;
+                    focus-on-click: false;
+                    focusable: false;
+                    title: _("Cursor size");
+
+                    adjustment: Adjustment {
+                      lower: 1;
+                      upper: 10;
+                      value: 3;
+                      page-increment: 10;
+                      step-increment: 1;
+                    };
+
+                    changed => $handle_cursor_size_changed() swapped;
+                  }
+                };
+              }
+            };
+          }
+
+          StackPage background_page {
+            title: _("Background");
+
+            child: Label {
+              label: _("Empty Page");
+            };
+          }
+        }
+      };
+
+      start-child: Box {
+        hexpand: true;
+        margin-bottom: 12;
+        margin-end: 12;
+        margin-start: 24;
+        margin-top: 12;
+        orientation: vertical;
+        spacing: 20;
+        vexpand: true;
+
+        Picture video_area {
+          can-shrink: true;
+          height-request: 450;
+          vexpand: true;
+          width-request: 800;
+          accessible-role: presentation;
+        }
+
+        CenterBox {
+          [start]
+          Box {
+            halign: start;
+            spacing: 20;
+
+            Button zoom_button {
+              tooltip-text: _("Zoom into a portion of the video");
+              clicked => $handle_zoom_clicked() swapped;
+
+              Adw.ButtonContent {
+                icon-name: "zoom-in-symbolic";
+                label: _("Zoom");
+              }
+            }
+
+            Button trim_button {
+              tooltip-text: _("Cut a portion of the video");
+              sensitive: false;
+
+              Adw.ButtonContent {
+                icon-name: "edit-cut-symbolic";
+                label: _("Trim");
+              }
+            }
+
+            Button speed_button {
+              tooltip-text: _("Speed up a portion of the video");
+              sensitive: false;
+
+              Adw.ButtonContent {
+                icon-name: "media-seek-forward-symbolic";
+                label: _("Speed");
+              }
+            }
+          }
+
+          [center]
+          Button pause_button {
+            tooltip-text: _("Pause or resume playback");
+            halign: center;
+            hexpand: true;
+            icon-name: "media-playback-pause-symbolic";
+            sensitive: false;
+            valign: center;
+
+            styles [
+              "circular opaque",
+            ]
+
+            clicked => $handle_pause_clicked() swapped;
+          }
+
+          [end]
+          $VideoTimecode timecode_widget {
+            can-focus: "false";
+            can-target: "false";
+            halign: "end";
+            hexpand: "true";
+          }
+        }
+
+        Adw.Bin timeline_box {
+          height-request: 0;
+          vexpand: true;
+
+          $VideoTimeline timeline_widget {
+            height-request: "60";
+            hexpand: "true";
+            vexpand: "true";
+          }
+        }
+      };
+    };
+
+    [top]
+    Adw.HeaderBar {
+      [end]
+      MenuButton {
+        icon-name: "open-menu-symbolic";
+        menu-model: primary_menu;
+        primary: true;
+        tooltip-text: _("Main Menu");
+      }
+
+      [end]
+      Button render_button {
+        sensitive: false;
+
+        styles [
+          "suggested-action",
+        ]
+
+        tooltip-text: _("Render video");
+        clicked => $handle_render_clicked() swapped;
+
+        Adw.ButtonContent {
+          icon-name: "camera-web-symbolic";
+          label: _("Render");
+        }
+      }
+    }
+  };
+}

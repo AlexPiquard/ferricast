@@ -1,0 +1,24 @@
+using Gtk 4.0;
+using Adw 1;
+
+Adw.ShortcutsDialog help_overlay {
+
+  Adw.ShortcutsSection {
+    title: _("General");
+
+    Adw.ShortcutsItem {
+      title: _("Show Shortcuts");
+      action-name: "win.show-help-overlay";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Close Window");
+      action-name: "window.close";
+    }
+
+    Adw.ShortcutsItem {
+      title: _("Quit");
+      action-name: "app.quit";
+    }
+  }
+}
