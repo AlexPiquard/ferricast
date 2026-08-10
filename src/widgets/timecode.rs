@@ -5,8 +5,10 @@ use gtk::subclass::prelude::*;
 use std::{cell::RefCell, rc::Rc};
 
 mod imp {
+    use gst::Fraction;
+
     use super::*;
-    use std::cell::{OnceCell, Ref};
+    use std::cell::OnceCell;
 
     #[derive(Default)]
     pub struct Timecode {
@@ -34,37 +36,21 @@ mod imp {
             label.add_css_class("monospace");
             self.obj().set_child(Some(&label));
 
-            let this = self.obj().downgrade();
             let label_clone = label.downgrade();
-            self.obj().add_tick_callback(move |_, _| {
-                let Some(this) = this.upgrade() else {
-                    return glib::ControlFlow::Break;
-                };
+            self.obj().add_tick_callback(move |this, _| {
                 let Some(label) = label_clone.upgrade() else {
                     return glib::ControlFlow::Break;
                 };
-                let imp = this.imp();
-                if imp.video.get().is_some() {
-                    let pos = imp.video().current_position_nsec().unwrap_or(0);
-                    let dur = imp.video().duration_nsec();
-                    let fmt = |ns: u64, fps: Option<gst::Fraction>| {
-                        let s = ns / 1_000_000_000;
-                        let h = s / 3600;
-                        let m = (s % 3600) / 60;
-                        let sec = s % 60;
-                        if let Some(fps) = fps {
-                            let numer = fps.numer() as u64;
-                            let denom = fps.denom() as u64;
-                            let total_frames = ns * numer / (denom * 1_000_000_000);
-                            let tc_fps = (numer + denom - 1) / denom;
-                            let f = total_frames % tc_fps;
-                            format!("{:02}:{:02}:{:02}:{:02}", h, m, sec, f)
-                        } else {
-                            format!("{:02}:{:02}:{:02}", h, m, sec)
-                        }
-                    };
-                    let fps = imp.video().framerate();
-                    label.set_text(&format!("{} / {}", fmt(pos, fps), fmt(dur, fps)));
+                if let Some(video) = this.imp().video.get() {
+                    let video = video.borrow();
+                    let pos = video.current_position_nsec().unwrap_or(0);
+                    let dur = video.duration_nsec();
+                    let fps = video.framerate();
+                    label.set_text(&format!(
+                        "{} / {}",
+                        this.imp().fmt_frame_number(pos, fps),
+                        this.imp().fmt_frame_number(dur, fps)
+                    ));
                 }
                 glib::ControlFlow::Continue
             });
@@ -79,8 +65,21 @@ mod imp {
             self.video.set(video).expect("failed to set video");
         }
 
-        fn video(&self) -> Ref<'_, Video> {
-            self.video.get().expect("undefined video").borrow()
+        fn fmt_frame_number(&self, ns: u64, fps: Option<Fraction>) -> String {
+            let s = ns / 1_000_000_000;
+            let h = s / 3600;
+            let m = (s % 3600) / 60;
+            let sec = s % 60;
+            if let Some(fps) = fps {
+                let numer = fps.numer() as u64;
+                let denom = fps.denom() as u64;
+                let total_frames = ns * numer / (denom * 1_000_000_000);
+                let tc_fps = numer.div_ceil(denom);
+                let f = total_frames % tc_fps;
+                format!("{:02}:{:02}:{:02}:{:02}", h, m, sec, f)
+            } else {
+                format!("{:02}:{:02}:{:02}:00", h, m, sec)
+            }
         }
     }
 }

@@ -29,11 +29,11 @@ pub fn tmp_dir(folder: Option<String>) -> PathBuf {
 }
 
 pub fn resolve_portal_path(portal_path: &Path) -> PathBuf {
-    if let Ok(Some(xattr_value)) = xattr::get(portal_path, "user.document-portal.host-path") {
-        if let Ok(real_path_str) = String::from_utf8(xattr_value) {
-            let clean_path = real_path_str.trim_end_matches('\0');
-            return PathBuf::from(clean_path);
-        }
+    if let Ok(Some(xattr_value)) = xattr::get(portal_path, "user.document-portal.host-path")
+        && let Ok(real_path_str) = String::from_utf8(xattr_value)
+    {
+        let clean_path = real_path_str.trim_end_matches('\0');
+        return PathBuf::from(clean_path);
     }
     portal_path.to_path_buf()
 }

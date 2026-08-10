@@ -453,7 +453,7 @@ mod imp {
 
             let delete_content = adw::ButtonContent::builder()
                 .icon_name("user-trash-symbolic")
-                .label(&gettext("Remove"))
+                .label(gettext("Remove"))
                 .build();
             let delete = gtk::Button::builder()
                 .child(&delete_content)

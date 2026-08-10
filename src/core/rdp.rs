@@ -1,13 +1,5 @@
 use crate::core::cursor::CursorEntry;
 
-/// adjust cursor entries locations to match an image
-// pub fn adjust_cursor_for_image(points: &mut Vec<CursorEntry>, offset_x: f64, offset_y: f64) {
-//     for point in points.iter_mut() {
-//         point.x = point.initial_x - offset_x;
-//         point.y = point.initial_y - offset_y;
-//     }
-// }
-
 fn perpendicular_distance(p: CursorEntry, a: CursorEntry, b: CursorEntry) -> f64 {
     let dx = b.x - a.x;
     let dy = b.y - a.y;
@@ -77,7 +69,7 @@ pub fn get_position_at_time(
     used_points: &[usize],
     current_time: f64,
 ) -> (f64, f64) {
-    let idx = get_cursor_index_at_time(&points, &used_points, current_time);
+    let idx = get_cursor_index_at_time(points, used_points, current_time);
 
     // get the 4 control points (with edge protection)
     let p0 = points[used_points[idx.saturating_sub(1)]];

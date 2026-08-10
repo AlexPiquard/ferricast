@@ -392,11 +392,9 @@ impl Video {
             return Ok(());
         }
 
-        let mut i = 0;
-        for cursor_index in cursor_type_entries {
-            let cursor = self.cursor_entries[cursor_index];
+        for (i, cursor_index) in cursor_type_entries.iter().enumerate() {
+            let cursor = self.cursor_entries[*cursor_index];
             self.add_cursor_img_layer(i, cursor.cursor_type_hash.unwrap())?;
-            i += 1;
         }
 
         self.update_cursor_smoothing();
@@ -727,7 +725,7 @@ impl Video {
     pub fn update_cursor_size(&mut self, size: u32) -> Result<()> {
         for (_, layer) in self.cursor_layers.iter() {
             let clips = layer.clips();
-            let Some(clip) = clips.iter().next() else {
+            let Some(clip) = clips.first() else {
                 continue;
             };
             let Some(asset) = clip.asset() else {
