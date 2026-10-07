@@ -264,7 +264,7 @@ mod imp {
             let this = self.obj().clone();
             let video = Video::try_new(
                 recording_file,
-                Some(move |enabled| {
+                Some(move |enabled, reason: Option<&String>| {
                     this.imp().cursor_show.set_sensitive(enabled);
                     this.imp().cursor_smoothing_scale.set_sensitive(enabled);
                     this.imp().cursor_size_spin.set_sensitive(enabled);
@@ -278,11 +278,11 @@ mod imp {
                         row.set_sensitive(enabled);
                     }
 
-                    this.imp().cursor_page_banner.set_revealed(!enabled);
-                    if !enabled {
-                        this.imp().cursor_page_banner.set_title(&gettext(
-                            "Cursor file not found, related features are disabled",
-                        ));
+                    if enabled || reason.is_some() {
+                        this.imp().cursor_page_banner.set_revealed(!enabled);
+                    }
+                    if !enabled && let Some(reason) = reason {
+                        this.imp().cursor_page_banner.set_title(reason);
                     }
                 }),
             )?;

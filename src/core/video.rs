@@ -9,6 +9,7 @@ use anyhow::bail;
 use derivative::Derivative;
 use ges::Layer;
 use ges::prelude::*;
+use gettextrs::gettext;
 use gst_controller::prelude::*;
 use std::fs::File;
 use std::io::Read;
@@ -148,7 +149,7 @@ struct CursorControlSources {
 
 type CursorControlSourcesTypes = HashMap<u64, CursorControlSources>;
 
-pub type OnCursorToggle = Option<Rc<dyn Fn(bool) + 'static>>;
+pub type OnCursorToggle = Option<Rc<dyn Fn(bool, Option<&String>) + 'static>>;
 
 #[derive(Derivative)]
 #[derivative(Default, Clone, Debug)]
@@ -178,7 +179,7 @@ pub struct Video {
 impl Video {
     pub fn try_new<F>(recording_file: PathBuf, on_cursor_toggle: Option<F>) -> Result<Self>
     where
-        F: Fn(bool) + 'static,
+        F: Fn(bool, Option<&String>) + 'static,
     {
         let timeline = ges::Timeline::new();
 
@@ -254,7 +255,8 @@ impl Video {
             zoom_cs,
             zoom_effects: Vec::new(),
             cursor_enabled: true,
-            cursor_on_toggle: on_cursor_toggle.map(|f| Rc::new(f) as Rc<dyn Fn(bool)>),
+            cursor_on_toggle: on_cursor_toggle
+                .map(|f| Rc::new(f) as Rc<dyn Fn(bool, Option<&String>)>),
             cursor_smoothing,
             cursor_show: true,
             cursor_cs: CursorControlSourcesTypes::new(),
@@ -269,7 +271,12 @@ impl Video {
         let curs_path = real_path.with_extension("curs");
         let curs_path_str = curs_path.to_str().unwrap();
         if !curs_path.exists() {
-            self.set_cursor_enabled(false)?;
+            self.set_cursor_enabled(
+                false,
+                Some(&gettext(
+                    "Cursor file not found, related features are disabled",
+                )),
+            )?;
             bail!(
                 "curs file not found at {}, cursor features are disabled",
                 curs_path_str
@@ -277,6 +284,15 @@ impl Video {
         }
 
         let (cursor_entries, cursor_type_entries) = read_cursor_entries(curs_path_str)?;
+        if cursor_type_entries.is_empty() {
+            self.set_cursor_enabled(
+                false,
+                Some(&gettext(
+                    "Incomplete cursor file content, related features are disabled",
+                )),
+            )?;
+            bail!("no cursor type defined in curs file, cursor features are disabled",);
+        }
 
         self.cursor_entries = cursor_entries;
         self.setup_cursor_entries(cursor_type_entries)?;
@@ -345,7 +361,7 @@ impl Video {
             // PERF:
             self.update_cursor_types();
         } else {
-            for (_, cs) in self.cursor_cs.iter() {
+            for cs in self.cursor_cs.values() {
                 cs.alpha.unset_all();
                 cs.alpha.set(gst::ClockTime::ZERO, 0.0);
             }
@@ -377,11 +393,11 @@ impl Video {
         self.video_framerate
     }
 
-    pub fn set_cursor_enabled(&mut self, enabled: bool) -> Result<()> {
+    pub fn set_cursor_enabled(&mut self, enabled: bool, reason: Option<&String>) -> Result<()> {
         self.set_cursor_show(enabled)?;
         self.cursor_enabled = enabled;
         if let Some(callback) = self.cursor_on_toggle.as_ref() {
-            callback(enabled);
+            callback(enabled, reason);
         }
         Ok(())
     }
@@ -467,7 +483,7 @@ impl Video {
     // FIX: no cursor at beginning
     // PERF: freeze
     fn update_cursor_types(&self) {
-        for (_, cs) in self.cursor_cs.iter() {
+        for cs in self.cursor_cs.values() {
             cs.alpha.set(gst::ClockTime::ZERO, 0.0);
         }
         let mut prev_hash: Option<u64> = None;
@@ -518,7 +534,7 @@ impl Video {
     }
 
     pub fn redraw_cursor(&mut self) {
-        for (_, cs) in self.cursor_cs.iter() {
+        for cs in self.cursor_cs.values() {
             self.redraw_cursor_type(cs);
         }
     }
@@ -723,7 +739,7 @@ impl Video {
     }
 
     pub fn update_cursor_size(&mut self, size: u32) -> Result<()> {
-        for (_, layer) in self.cursor_layers.iter() {
+        for layer in self.cursor_layers.values() {
             let clips = layer.clips();
             let Some(clip) = clips.first() else {
                 continue;
@@ -804,7 +820,9 @@ fn read_cursor_entries(path: &str) -> anyhow::Result<(Vec<CursorEntry>, Vec<usiz
     let mut types: Vec<usize> = Vec::new();
     let mut i = 0;
     let entries: Vec<CursorEntry> = data
-        .chunks_exact(24)
+        .as_chunks::<24>()
+        .0
+        .iter()
         .map(|chunk| {
             let raw_hash = u64::from_le_bytes(chunk[16..24].try_into().unwrap());
             let cursor_type_hash = if raw_hash == 0 { None } else { Some(raw_hash) };

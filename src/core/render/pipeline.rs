@@ -55,7 +55,8 @@ impl Render {
     }
 
     fn setup(&mut self) -> anyhow::Result<()> {
-        let mut timeline = video::Video::try_new(self.input.clone(), None::<fn(bool)>)?;
+        let mut timeline =
+            video::Video::try_new(self.input.clone(), None::<fn(bool, Option<&String>)>)?;
         if let Err(e) = timeline.setup_cursor() {
             tracing::warn!("failed to setup rendering video cursor: {:?}", e);
         }

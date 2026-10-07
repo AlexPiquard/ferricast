@@ -11,7 +11,5 @@ pub fn setup_shortcuts(window: &adw::ApplicationWindow) {
             }
         });
         window.add_action(&action);
-    } else {
-        tracing::info!("not found!!");
     }
 }

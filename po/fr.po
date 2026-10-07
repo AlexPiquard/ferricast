@@ -3,12 +3,12 @@
 # This file is distributed under the same license as the ferricast package.
 # AlexPiquard <alex.piquard@hotmail.com>, 2026.
 #
-#: data/resources/ui/editor.blp:55
+#: data/resources/ui/editor.blp:57
 msgid ""
 msgstr ""
 "Project-Id-Version: ferricast\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-07-30 16:45+0200\n"
+"POT-Creation-Date: 2026-10-07 17:47+0200\n"
 "PO-Revision-Date: 2026-06-05 10:51+0200\n"
 "Last-Translator: AlexPiquard <alex.piquard@hotmail.com>\n"
 "Language-Team: French <traduc@traduc.org>\n"
@@ -53,7 +53,7 @@ msgstr ""
 "Effets de mouvement et déplacements de souris automatiques à partir des "
 "captures."
 
-#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:15
+#: data/fr.alexpiquard.ferricast.metainfo.xml.in.in:16
 msgid "Editor window"
 msgstr "Fenêtre de l'éditeur"
 
@@ -61,79 +61,79 @@ msgstr "Fenêtre de l'éditeur"
 msgid "_Preferences"
 msgstr "_Préférences"
 
-#: data/resources/ui/editor.blp:12 data/resources/ui/window.blp:12
+#: data/resources/ui/editor.blp:13 data/resources/ui/window.blp:12
 msgid "_Keyboard Shortcuts"
 msgstr "_Raccourcis clavier"
 
-#: data/resources/ui/editor.blp:16 data/resources/ui/window.blp:16
+#: data/resources/ui/editor.blp:18 data/resources/ui/window.blp:16
 msgid "_About Ferricast"
 msgstr "_À propos de Ferricast"
 
-#: data/resources/ui/editor.blp:24
+#: data/resources/ui/editor.blp:26
 msgid "Ferricast Editor"
 msgstr "Éditeur Ferricast"
 
-#: data/resources/ui/editor.blp:48
+#: data/resources/ui/editor.blp:50
 msgid "Cursor"
 msgstr "Curseur"
 
-#: data/resources/ui/editor.blp:71
+#: data/resources/ui/editor.blp:74
 msgid "Show cursor"
 msgstr "Afficher le curseur"
 
-#: data/resources/ui/editor.blp:78
+#: data/resources/ui/editor.blp:80
 msgid "Smoothing"
 msgstr "Lissage"
 
-#: data/resources/ui/editor.blp:105
+#: data/resources/ui/editor.blp:108
 msgid "Cursor size"
 msgstr "Taille du curseur"
 
-#: data/resources/ui/editor.blp:123
+#: data/resources/ui/editor.blp:126
 msgid "Background"
 msgstr "Arrière-plan"
 
-#: data/resources/ui/editor.blp:126
+#: data/resources/ui/editor.blp:129
 msgid "Empty Page"
 msgstr "Page vide"
 
-#: data/resources/ui/editor.blp:157
+#: data/resources/ui/editor.blp:160
 msgid "Zoom into a portion of the video"
 msgstr "Zoomer une partie de la video"
 
-#: data/resources/ui/editor.blp:163
+#: data/resources/ui/editor.blp:165
 msgid "Zoom"
 msgstr "Zoom"
 
-#: data/resources/ui/editor.blp:168
+#: data/resources/ui/editor.blp:170
 msgid "Cut a portion of the video"
 msgstr "Couper une partie de la video"
 
-#: data/resources/ui/editor.blp:173
+#: data/resources/ui/editor.blp:175
 msgid "Trim"
 msgstr "Rogner"
 
-#: data/resources/ui/editor.blp:178
+#: data/resources/ui/editor.blp:180
 msgid "Speed up a portion of the video"
 msgstr "Accélerer une partie de la video"
 
-#: data/resources/ui/editor.blp:183
+#: data/resources/ui/editor.blp:185
 msgid "Speed"
 msgstr "Vitesse"
 
-#: data/resources/ui/editor.blp:190
+#: data/resources/ui/editor.blp:192
 msgid "Pause or resume playback"
 msgstr "Mettre en pause ou reprendre la lecture"
 
-#: data/resources/ui/editor.blp:232 data/resources/ui/window.blp:71
+#: data/resources/ui/editor.blp:235 data/resources/ui/window.blp:71
 msgid "Main Menu"
 msgstr "Menu principal"
 
-#: data/resources/ui/editor.blp:241 data/resources/ui/render.blp:89
+#: data/resources/ui/editor.blp:246 data/resources/ui/render.blp:88
 msgid "Render video"
 msgstr "Créer la vidéo"
 
-#: data/resources/ui/editor.blp:246 data/resources/ui/render.blp:118
+#: data/resources/ui/editor.blp:251 data/resources/ui/render.blp:117
 msgid "Render"
 msgstr "Exporter"
 
@@ -145,43 +145,43 @@ msgstr "Changer le format de la vidéo produite"
 msgid "Video format"
 msgstr "Format vidéo"
 
-#: data/resources/ui/render.blp:40
+#: data/resources/ui/render.blp:39
 msgid "Set the exact timestamp in seconds where the video should begin"
 msgstr "Définir l'horodatage exact en secondes où la vidéo doit commencer"
 
-#: data/resources/ui/render.blp:41
+#: data/resources/ui/render.blp:40
 msgid "Start position (sec)"
 msgstr "Position de début (sec)"
 
-#: data/resources/ui/render.blp:55
+#: data/resources/ui/render.blp:54
 msgid "Set the exact timestamp in seconds where the video should end"
 msgstr "Définir l'horodatage exact en secondes où la vidéo doit se terminer"
 
-#: data/resources/ui/render.blp:56
+#: data/resources/ui/render.blp:55
 msgid "End position (sec)"
 msgstr "Position de fin (sec)"
 
-#: data/resources/ui/render.blp:104 data/resources/ui/render.blp:133
+#: data/resources/ui/render.blp:103 data/resources/ui/render.blp:132
 msgid "Cancel"
 msgstr "Annuler"
 
-#: data/resources/ui/render.blp:113
+#: data/resources/ui/render.blp:112
 msgid "Render video with defined settings"
 msgstr "Créer la vidéo avec les paramètres définis"
 
-#: data/resources/ui/render.blp:146
+#: data/resources/ui/render.blp:145
 msgid "Open the folder of the created video"
 msgstr "Ouvrir le dossier de la vidéo créée"
 
-#: data/resources/ui/render.blp:151
+#: data/resources/ui/render.blp:150
 msgid "Open Folder"
 msgstr "Ouvrir le dossier"
 
-#: data/resources/ui/render.blp:159
+#: data/resources/ui/render.blp:158
 msgid "Play the created video"
 msgstr "Lire la vidéo créée"
 
-#: data/resources/ui/render.blp:164
+#: data/resources/ui/render.blp:163
 msgid "Play"
 msgstr "Lire"
 
@@ -213,6 +213,18 @@ msgstr "Ouvrir un enregistrement existant"
 msgid "translator-credits"
 msgstr "Alex Piquard"
 
+#: src/core/video.rs:273
+msgid "Cursor file not found, related features are disabled"
+msgstr ""
+"Fichier de curseur introuvable, les fonctionnalités associées sont "
+"desactivées"
+
+#: src/core/video.rs:282
+msgid "Incomplete cursor file content, related features are disabled"
+msgstr ""
+"Fichier de curseur incomplet, les fonctionnalités associées sont "
+"desactivées"
+
 #: src/widgets/timeline.rs:381
 msgid "Factor"
 msgstr "Facteur"
@@ -237,12 +249,6 @@ msgstr "Durée d'anim. de fin"
 msgid "Remove"
 msgstr "Supprimer"
 
-#: src/windows/editor.rs:189
+#: src/windows/editor.rs:192
 msgid "Failed to open recording"
 msgstr "Echec d'ouverture de la vidéo"
-
-#: src/windows/editor.rs:281
-msgid "Cursor file not found, related features are disabled"
-msgstr ""
-"Fichier de curseur introuvable, les fonctionnalités associées sont "
-"desactivées"
